@@ -345,11 +345,11 @@ func (k *KumoruClient) EndBytes(callback ...func(response Response, body []byte,
 		}
 		if len(b) != 0 {
 			data := md5.Sum(b)
-			newdata := fmt.Sprintf("%x", string(data[:16]))
+			newdata := fmt.Sprintf("content-md5:%x", string(data[:16]))
 
 			req.Header.Set("Content-MD5", newdata)
 
-			signingString += newdata + "\n" + "application/x-www-form-urlencoded" + "\n"
+			signingString += fmt.Sprintf("content-type:%v", req.Header.Get("Content-Type")+"\n")
 		}
 		u, _ := url.Parse(k.Url)
 		signingString += "x-kumoru-date:" + date.String() + "\n" + u.Path
