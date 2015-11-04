@@ -59,7 +59,7 @@ func Show(uuid string) {
 	k.Logger.Info("errs: ", errs)
 }
 
-func DeploymentDeploy(uuid string) {
+func ApplicationDeploy(uuid string) {
 	k := kumoru.New()
 
 	resp, body, errs := k.Post(fmt.Sprintf("%s/v1/applications/%s/deployments/", k.EndPoint.Application, uuid)).
@@ -71,7 +71,7 @@ func DeploymentDeploy(uuid string) {
 	k.Logger.Info("errs: ", errs)
 }
 
-func DeploymentDelete(uuid string) {
+func ApplicationDelete(uuid string) {
 	k := kumoru.New()
 
 	resp, body, errs := k.Post(fmt.Sprintf("%s/v1/applications/%s/deployments/", k.EndPoint.Application, uuid)).
