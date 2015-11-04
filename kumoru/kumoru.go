@@ -14,7 +14,6 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
-	"os/user"
 	"reflect"
 	"strings"
 	"time"
@@ -62,12 +61,10 @@ func New() *KumoruClient {
 	config := os.Getenv("KUMORU_CONFIG")
 
 	if config == "" {
-		usr, err := user.Current()
-		if err != nil {
-			log.Fatal(err)
-		}
+		usrHome := os.Getenv("HOME")
 
-		config = usr.HomeDir + "/.kumoru/config"
+		config = usrHome + "/.kumoru/config"
+
 	}
 
 	c, err := LoadCreds(config, "auth")
