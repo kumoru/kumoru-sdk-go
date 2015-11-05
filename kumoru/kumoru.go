@@ -331,23 +331,22 @@ func (k *KumoruClient) EndBytes(callback ...func(response Response, body []byte,
 			req.SetBasicAuth(k.BasicAuth.UserName, k.BasicAuth.Password)
 		}
 	} else {
-		b1 := strings.NewReader(k.RawString)
 		date := time.Now()
 		signingString := k.Method + "\n"
 
-		b, err := ioutil.ReadAll(b1)
+		d, err := ioutil.ReadAll(strings.NewReader(k.RawString))
 
 		if err != nil {
 			log.Fatal(err)
 		}
-		if len(b) != 0 {
-			data := md5.Sum(b)
-			newdata := fmt.Sprintf("content-md5:%x", string(data[:16]))
+		if len(d) != 0 {
+			md5Sum := md5.Sum(d)
+			req.Header.Set("Content-MD5", fmt.Sprintf("%x", string(md5Sum[:16])))
 
-			req.Header.Set("Content-MD5", fmt.Sprintf("%x", string(data[:16])))
-
-			signingString += newdata + "\n" + fmt.Sprintf("content-type:%v", req.Header.Get("Content-Type")+"\n")
+			signingString += fmt.Sprintf("content-md5:%x", string(md5Sum[:16])) + "\n"
+			signingString += fmt.Sprintf("content-type:%v", req.Header.Get("Content-Type")+"\n")
 		}
+
 		u, _ := url.Parse(k.Url)
 		signingString += "x-kumoru-date:" + date.String() + "\n" + u.Path
 		req.Header.Set("X-Kumoru-Date", date.String())
