@@ -344,9 +344,9 @@ func (k *KumoruClient) EndBytes(callback ...func(response Response, body []byte,
 			data := md5.Sum(b)
 			newdata := fmt.Sprintf("content-md5:%x", string(data[:16]))
 
-			req.Header.Set("Content-MD5", newdata)
+			req.Header.Set("Content-MD5", fmt.Sprintf("%x", string(data[:16])))
 
-			signingString += fmt.Sprintf("content-type:%v", req.Header.Get("Content-Type")+"\n")
+			signingString += newdata + "\n" + fmt.Sprintf("content-type:%v", req.Header.Get("Content-Type")+"\n")
 		}
 		u, _ := url.Parse(k.Url)
 		signingString += "x-kumoru-date:" + date.String() + "\n" + u.Path
