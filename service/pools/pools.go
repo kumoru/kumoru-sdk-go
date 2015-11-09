@@ -3,6 +3,7 @@ package pools
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/kumoru/kumoru-sdk-go/kumoru"
 )
@@ -15,13 +16,12 @@ func Create(location string, credentials string) (*http.Response, string, []erro
 	}
 
 	return k.Post(fmt.Sprintf("%v/v1/pools/", k.EndPoint.Pool)).
-		Send(fmt.Sprintf("location=%s&credentials=%s", location, credentials)).
+		Send(url.QueryEscape(fmt.Sprintf("location=%s&credentials=%s", location, credentials))).
 		SignRequest(true).
 		End()
 }
 
 func List() (*http.Response, string, []error) {
-
 	k := kumoru.New()
 
 	return k.Get(fmt.Sprintf("%v/v1/pools/", k.EndPoint.Pool)).

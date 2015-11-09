@@ -3,37 +3,18 @@ package application
 import (
 	"fmt"
 	"net/http"
-	"strings"
+	"net/url"
 
 	"github.com/kumoru/kumoru-sdk-go/kumoru"
 )
 
 func Create(name, image string, envVars, rules, ports []string) (*http.Response, string, []error) {
-	var params string
 
 	k := kumoru.New()
 
 	k = k.Post(fmt.Sprintf("%s/v1/applications/", k.EndPoint.Application))
 
-	k = k.Send(fmt.Sprintf("name=%s&", name))
-
-	k = k.Send(strings.Replace(fmt.Sprintf("image_url=%s&", image), "+", "%2B", -1))
-
-	for _, envVar := range envVars {
-		params += fmt.Sprintf("environment=%s&", envVar)
-	}
-
-	for _, port := range ports {
-		params += fmt.Sprintf("ports=%s&", port)
-	}
-
-	for _, rule := range rules {
-		params += fmt.Sprintf("rule=%s&", rule)
-	}
-
-	if params != "" {
-		k = k.Send(params)
-	}
+	k = k.Send(genParameters(name, image, envVars, rules, ports))
 
 	return k.SignRequest(true).
 		End()
@@ -55,7 +36,7 @@ func Show(uuid string) (*http.Response, string, []error) {
 		End()
 }
 
-func ApplicationDeploy(uuid string) (*http.Response, string, []error) {
+func Deploy(uuid string) (*http.Response, string, []error) {
 	k := kumoru.New()
 
 	return k.Post(fmt.Sprintf("%s/v1/applications/%s/deployments/", k.EndPoint.Application, uuid)).
@@ -63,7 +44,7 @@ func ApplicationDeploy(uuid string) (*http.Response, string, []error) {
 		End()
 }
 
-func ApplicationDelete(uuid string) (*http.Response, string, []error) {
+func Delete(uuid string) (*http.Response, string, []error) {
 	k := kumoru.New()
 
 	resp, body, errs := k.Post(fmt.Sprintf("%s/v1/applications/%s/deployments/", k.EndPoint.Application, uuid)).
@@ -74,15 +55,27 @@ func ApplicationDelete(uuid string) (*http.Response, string, []error) {
 }
 
 func Patch(uuid, name, image string, envVars, rules, ports []string) (*http.Response, string, []error) {
-	var params string
 
 	k := kumoru.New()
 
-	k = k.Patch(fmt.Sprintf("%s/v1/applications/%s/", k.EndPoint.Application, uuid))
+	k = k.Patch(fmt.Sprintf("%s/v1/applications/%s", k.EndPoint.Application, uuid))
 
-	k = k.Send(fmt.Sprintf("name=%s&", name))
+	k = k.Send(genParameters(name, image, envVars, rules, ports))
 
-	k = k.Send(strings.Replace(fmt.Sprintf("image_url=%s&", image), "+", "%2B", -1))
+	return k.SignRequest(true).
+		End()
+}
+
+func genParameters(name, image string, envVars, rules, ports []string) string {
+	var params string
+
+	if name != "" {
+		params += fmt.Sprintf("name=%s&", name)
+	}
+
+	if image != "" {
+		params += fmt.Sprintf("image_url=%s&", image)
+	}
 
 	for _, envVar := range envVars {
 		params += fmt.Sprintf("environment=%s&", envVar)
@@ -96,10 +89,5 @@ func Patch(uuid, name, image string, envVars, rules, ports []string) (*http.Resp
 		params += fmt.Sprintf("rule=%s&", rule)
 	}
 
-	if params != "" {
-		k = k.Send(params)
-	}
-
-	return k.SignRequest(true).
-		End()
+	return url.QueryEscape(params)
 }
