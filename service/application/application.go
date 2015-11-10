@@ -8,13 +8,15 @@ import (
 	"github.com/kumoru/kumoru-sdk-go/kumoru"
 )
 
-func Create(name, image string, envVars, rules, ports []string) (*http.Response, string, []error) {
+func Create(pool_uuid, name, image string, envVars, rules, ports []string) (*http.Response, string, []error) {
 
 	k := kumoru.New()
 
 	k = k.Post(fmt.Sprintf("%s/v1/applications/", k.EndPoint.Application))
 
 	k = k.Send(genParameters(name, image, envVars, rules, ports))
+
+	k = k.Send(fmt.Sprintf("pool_uuid=%s&", url.QueryEscape(pool_uuid)))
 
 	return k.SignRequest(true).
 		End()
@@ -28,37 +30,37 @@ func List() (*http.Response, string, []error) {
 		End()
 }
 
-func Show(uuid string) (*http.Response, string, []error) {
+func Show(application_uuid string) (*http.Response, string, []error) {
 	k := kumoru.New()
 
-	return k.Get(fmt.Sprintf("%s/v1/applications/%s", k.EndPoint.Application, uuid)).
+	return k.Get(fmt.Sprintf("%s/v1/applications/%s", k.EndPoint.Application, application_uuid)).
 		SignRequest(true).
 		End()
 }
 
-func Deploy(uuid string) (*http.Response, string, []error) {
+func Deploy(application_uuid string) (*http.Response, string, []error) {
 	k := kumoru.New()
 
-	return k.Post(fmt.Sprintf("%s/v1/applications/%s/deployments/", k.EndPoint.Application, uuid)).
+	return k.Post(fmt.Sprintf("%s/v1/applications/%s/deployments/", k.EndPoint.Application, application_uuid)).
 		SignRequest(true).
 		End()
 }
 
-func Delete(uuid string) (*http.Response, string, []error) {
+func Delete(application_uuid string) (*http.Response, string, []error) {
 	k := kumoru.New()
 
-	resp, body, errs := k.Delete(fmt.Sprintf("%s/v1/applications/%s", k.EndPoint.Application, uuid)).
+	resp, body, errs := k.Delete(fmt.Sprintf("%s/v1/applications/%s", k.EndPoint.Application, application_uuid)).
 		SignRequest(true).
 		End()
 
 	return resp, body, errs
 }
 
-func Patch(uuid, name, image string, envVars, rules, ports []string) (*http.Response, string, []error) {
+func Patch(application_uuid, name, image string, envVars, rules, ports []string) (*http.Response, string, []error) {
 
 	k := kumoru.New()
 
-	k = k.Patch(fmt.Sprintf("%s/v1/applications/%s", k.EndPoint.Application, uuid))
+	k = k.Patch(fmt.Sprintf("%s/v1/applications/%s", k.EndPoint.Application, application_uuid))
 
 	k = k.Send(genParameters(name, image, envVars, rules, ports))
 
