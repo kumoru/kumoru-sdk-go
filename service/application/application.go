@@ -70,24 +70,24 @@ func genParameters(name, image string, envVars, rules, ports []string) string {
 	var params string
 
 	if name != "" {
-		params += fmt.Sprintf("name=%s&", name)
+		params += fmt.Sprintf("name=%s&", url.QueryEscape(name))
 	}
 
 	if image != "" {
-		params += fmt.Sprintf("image_url=%s&", image)
+		params += fmt.Sprintf("image_url=%s&", url.QueryEscape(image))
 	}
 
 	for _, envVar := range envVars {
-		params += fmt.Sprintf("environment=%s&", envVar)
+		params += fmt.Sprintf("environment=%s&", url.QueryEscape(envVar))
 	}
 
 	for _, port := range ports {
-		params += fmt.Sprintf("ports=%s&", port)
+		params += fmt.Sprintf("ports=%s&", url.QueryEscape(port))
 	}
 
 	for _, rule := range rules {
-		params += fmt.Sprintf("rule=%s&", rule)
+		params += fmt.Sprintf("rule=%s&", url.QueryEscape(rule))
 	}
 
-	return url.QueryEscape(params)
+	return params
 }

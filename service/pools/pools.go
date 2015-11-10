@@ -16,7 +16,7 @@ func Create(location string, credentials string) (*http.Response, string, []erro
 	}
 
 	return k.Post(fmt.Sprintf("%v/v1/pools/", k.EndPoint.Pool)).
-		Send(url.QueryEscape(fmt.Sprintf("location=%s&credentials=%s", location, credentials))).
+		Send(fmt.Sprintf("location=%s&credentials=%s", url.QueryEscape(location), url.QueryEscape(credentials))).
 		SignRequest(true).
 		End()
 }
