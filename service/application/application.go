@@ -47,7 +47,7 @@ func Deploy(uuid string) (*http.Response, string, []error) {
 func Delete(uuid string) (*http.Response, string, []error) {
 	k := kumoru.New()
 
-	resp, body, errs := k.Post(fmt.Sprintf("%s/v1/applications/%s/deployments/", k.EndPoint.Application, uuid)).
+	resp, body, errs := k.Delete(fmt.Sprintf("%s/v1/applications/%s", k.EndPoint.Application, uuid)).
 		SignRequest(true).
 		End()
 
