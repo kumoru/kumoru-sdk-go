@@ -8,13 +8,13 @@ import (
 	"github.com/kumoru/kumoru-sdk-go/kumoru"
 )
 
-func Create(poolUuid, name, image string, envVars, providerCredentials, rules, ports []string) (*http.Response, string, []error) {
+func Create(poolUuid, name, image, providerCredentials string, envVars, rules, ports []string) (*http.Response, string, []error) {
 
 	k := kumoru.New()
 
 	k = k.Post(fmt.Sprintf("%s/v1/applications/", k.EndPoint.Application))
 
-	k = k.Send(genParameters(name, image, envVars, providerCredentials, rules, ports))
+	k = k.Send(genParameters(name, image, providerCredentials, envVars, rules, ports))
 
 	k = k.Send(fmt.Sprintf("pool_uuid=%s&", url.QueryEscape(poolUuid)))
 
@@ -56,19 +56,19 @@ func Delete(applicationUuid string) (*http.Response, string, []error) {
 	return resp, body, errs
 }
 
-func Patch(applicationUuid, name, image string, envVars, providerCredentials, rules, ports []string) (*http.Response, string, []error) {
+func Patch(applicationUuid, name, image, providerCredentials string, envVars, rules, ports []string) (*http.Response, string, []error) {
 
 	k := kumoru.New()
 
 	k = k.Patch(fmt.Sprintf("%s/v1/applications/%s", k.EndPoint.Application, applicationUuid))
 
-	k = k.Send(genParameters(name, image, envVars, providerCredentials, rules, ports))
+	k = k.Send(genParameters(name, image, providerCredentials, envVars, rules, ports))
 
 	return k.SignRequest(true).
 		End()
 }
 
-func genParameters(name, image string, envVars, providerCredentials, rules, ports []string) string {
+func genParameters(name, image, providerCredentials string, envVars, rules, ports []string) string {
 	var params string
 
 	if name != "" {
@@ -79,7 +79,7 @@ func genParameters(name, image string, envVars, providerCredentials, rules, port
 		params += fmt.Sprintf("image_url=%s&", url.QueryEscape(image))
 	}
 
-	for _, providerCredentials := range providerCredentials {
+	if providerCredentials != "" {
 		params += fmt.Sprintf("provider_credentials=%s&", url.QueryEscape(providerCredentials))
 	}
 
