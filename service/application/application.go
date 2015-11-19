@@ -94,7 +94,7 @@ func genParameters(name, image, providerCredentials, metaData string, envVars, r
 	}
 
 	for _, rule := range rules {
-		params += fmt.Sprintf("rule=%s&", url.QueryEscape(rule))
+		params += fmt.Sprintf("rules=%s&", url.QueryEscape(rule))
 	}
 
 	return params
