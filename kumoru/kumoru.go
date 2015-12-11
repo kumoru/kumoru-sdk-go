@@ -6,6 +6,7 @@ import (
 	"crypto/md5"
 	"crypto/sha256"
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -19,6 +20,8 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+
+	"github.com/kumoru/kumoru-sdk-go/RootCAs"
 )
 
 const (
@@ -359,7 +362,14 @@ func (k *KumoruClient) EndBytes(callback ...func(response Response, body []byte,
 	}
 
 	// Set Transport
-	k.Client.Transport = k.Transport
+	certPool := *x509.NewCertPool()
+	certPool.AppendCertsFromPEM(RootCAs.AlphaSSLCA)
+
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{RootCAs: &certPool},
+	}
+
+	k.Client.Transport = tr
 
 	// Log details of this request
 	if k.Debug {
