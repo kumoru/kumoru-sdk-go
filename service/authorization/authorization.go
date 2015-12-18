@@ -8,12 +8,13 @@ import (
 	"github.com/kumoru/kumoru-sdk-go/kumoru"
 )
 
-func GetTokens() (string, *http.Response, string, []error) {
+func GetTokens(username, password string) (string, *http.Response, string, []error) {
 	k := kumoru.New()
 
 	token := uuid.New()
 
 	resp, body, errs := k.Put(fmt.Sprintf("%v/v1/tokens/%v", k.EndPoint.Authorization, token)).
+		SetBasicAuth(username, password).
 		End()
 
 	return token, resp, body, errs
