@@ -1,7 +1,7 @@
 package kumoru
 
 import (
-	"github.com/vaughan0/go-ini"
+	"gopkg.in/ini.v1"
 )
 
 type Ktokens struct {
@@ -10,15 +10,18 @@ type Ktokens struct {
 }
 
 func LoadTokens(filename string, section string) (Ktokens, error) {
-	config, err := ini.LoadFile(filename)
+	config, err := ini.Load(filename)
 	if err != nil {
 		return Ktokens{}, err
 	}
 
-	iniTokens := config.Section(section)
+	iniTokens, err := config.GetSection(section)
+	if err != nil {
+		return Ktokens{}, err
+	}
 
-	pubToken := iniTokens["kumoru_token_public"]
-	pvToken := iniTokens["kumoru_token_private"]
+	pubToken := iniTokens.Key("kumoru_token_public").String()
+	pvToken := iniTokens.Key("kumoru_token_private").String()
 
 	return Ktokens{
 		Public:  pubToken,

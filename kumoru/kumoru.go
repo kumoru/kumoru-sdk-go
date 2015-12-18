@@ -33,30 +33,32 @@ const (
 	PATCH  = "PATCH"
 )
 
-type Request *http.Request
-type Response *http.Response
+type (
+	Request  *http.Request
+	Response *http.Response
 
-type KumoruClient struct {
-	SliceData         []interface{}
-	BasicAuth         struct{ UserName, Password string }
-	BounceToRawString bool
-	Client            *http.Client
-	Data              map[string]interface{}
-	Debug             bool
-	EndPoint          *Endpoints
-	Errors            []error
-	FormData          url.Values
-	Header            map[string]string
-	Logger            *log.Logger
-	Method            string
-	QueryData         url.Values
-	RawString         string
-	Sign              bool
-	TargetType        string
-	Tokens            *Ktokens
-	Transport         *http.Transport
-	Url               string
-}
+	KumoruClient struct {
+		SliceData         []interface{}
+		BasicAuth         struct{ UserName, Password string }
+		BounceToRawString bool
+		Client            *http.Client
+		Data              map[string]interface{}
+		Debug             bool
+		EndPoint          *Endpoints
+		Errors            []error
+		FormData          url.Values
+		Header            map[string]string
+		Logger            *log.Logger
+		Method            string
+		QueryData         url.Values
+		RawString         string
+		Sign              bool
+		TargetType        string
+		Tokens            *Ktokens
+		Transport         *http.Transport
+		Url               string
+	}
+)
 
 // Used to create a new KumoruClient Object.
 func New() *KumoruClient {
@@ -70,11 +72,6 @@ func New() *KumoruClient {
 
 	}
 
-	c, err := LoadCreds(config, "auth")
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	e, err := LoadEndpoints(config, "endpoints")
 	if err != nil {
 		log.Fatal(err)
@@ -86,7 +83,6 @@ func New() *KumoruClient {
 	}
 
 	k := &KumoruClient{
-		BasicAuth:         struct{ UserName, Password string }{c.UserName, c.Password},
 		BounceToRawString: false,
 		Client:            &http.Client{},
 		Data:              make(map[string]interface{}),

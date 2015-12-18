@@ -1,7 +1,7 @@
 package kumoru
 
 import (
-	"github.com/vaughan0/go-ini"
+	"gopkg.in/ini.v1"
 )
 
 type Endpoints struct {
@@ -11,21 +11,24 @@ type Endpoints struct {
 }
 
 func LoadEndpoints(filename string, section string) (Endpoints, error) {
-	config, err := ini.LoadFile(filename)
+	config, err := ini.Load(filename)
 	if err != nil {
 		return Endpoints{}, err
 	}
 
-	iniEndpoints := config.Section(section)
-
-	application_api := iniEndpoints["kumoru_application_api"]
-	authorization_api := iniEndpoints["kumoru_authorization_api"]
-	pool_api := iniEndpoints["kumoru_pool_api"]
+	iniEndpoints, err := config.GetSection(section)
+	if err != nil {
+		return Endpoints{
+			Application:   "https://application.kumoru.io:5000",
+			Authorization: "https://authorization.kumoru.io:5000",
+			Pool:          "https://pool.kumoru.io:5000",
+		}, nil
+	}
 
 	return Endpoints{
-		Application:   application_api,
-		Authorization: authorization_api,
-		Pool:          pool_api,
+		Application:   iniEndpoints.Key("kumoru_application_api").String(),
+		Authorization: iniEndpoints.Key("kumoru_authorization_api").String(),
+		Pool:          iniEndpoints.Key("kumoru_pool_api").String(),
 	}, nil
 
 }
