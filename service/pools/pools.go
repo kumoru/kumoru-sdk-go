@@ -29,6 +29,14 @@ func List() (*http.Response, string, []error) {
 		End()
 }
 
+func Show(uuid string) (*http.Response, string, []error) {
+	k := kumoru.New()
+
+	return k.Get(fmt.Sprintf("%v/v1/pools/%s", k.EndPoint.Pool, uuid)).
+		SignRequest(true).
+		End()
+}
+
 func Delete(uuid string) (*http.Response, string, []error) {
 	k := kumoru.New()
 
