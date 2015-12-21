@@ -27,7 +27,7 @@ func LoadTokens(filename string, section string) (Ktokens, error) {
 
 }
 
-func SaveTokens(filename string, section string, tokens Ktokens) error {
+func SaveTokens(filename, section string, tokens Ktokens) error {
 
 	config, err := ini.Load(filename)
 
@@ -39,5 +39,24 @@ func SaveTokens(filename string, section string, tokens Ktokens) error {
 	config.Section(section).NewKey("kumoru_token_public", tokens.Public)
 	config.Section(section).NewKey("kumoru_token_private", tokens.Private)
 	return config.SaveTo(filename)
+}
+
+func HasTokens(filename, section string) bool {
+	config, err := ini.Load(filename)
+	if err != nil {
+		return false
+	}
+
+	tokens, err := config.GetSection(section)
+
+	if err != nil {
+		return false
+	}
+
+	if tokens.Key("kumoru_token_public").String() == "" || tokens.Key("kumoru_token_private").String() == "" {
+		return false
+	}
+
+	return true
 
 }
