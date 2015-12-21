@@ -20,12 +20,24 @@ func LoadTokens(filename string, section string) (Ktokens, error) {
 		return Ktokens{}, err
 	}
 
-	pubToken := iniTokens.Key("kumoru_token_public").String()
-	pvToken := iniTokens.Key("kumoru_token_private").String()
-
 	return Ktokens{
-		Public:  pubToken,
-		Private: pvToken,
+		Public:  iniTokens.Key("kumoru_token_public").String(),
+		Private: iniTokens.Key("kumoru_token_private").String(),
 	}, nil
+
+}
+
+func SaveTokens(filename string, section string, tokens Ktokens) error {
+
+	config, err := ini.Load(filename)
+
+	if err != nil {
+		config = ini.Empty()
+		config.NewSection(section)
+	}
+
+	config.Section(section).NewKey("kumoru_token_public", tokens.Public)
+	config.Section(section).NewKey("kumoru_token_private", tokens.Private)
+	return config.SaveTo(filename)
 
 }

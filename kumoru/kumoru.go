@@ -79,7 +79,7 @@ func New() *KumoruClient {
 
 	t, err := LoadTokens(config, "tokens")
 	if err != nil {
-		log.Fatal(err)
+		log.Warning("No tokens found...")
 	}
 
 	k := &KumoruClient{
