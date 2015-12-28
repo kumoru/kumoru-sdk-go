@@ -82,7 +82,7 @@ func New() *KumoruClient {
 		log.Warning("No tokens found...")
 	}
 
-	k := &KumoruClient{
+	return &KumoruClient{
 		BounceToRawString: false,
 		Client:            &http.Client{},
 		Data:              make(map[string]interface{}),
@@ -102,22 +102,18 @@ func New() *KumoruClient {
 		Url:               "",
 	}
 
-	return k
 }
 
-func (k *KumoruClient) SignRequest(enable bool) *KumoruClient {
+func (k *KumoruClient) SignRequest(enable bool) {
 	k.Sign = enable
-	return k
 }
 
-func (k *KumoruClient) SetDebug(enable bool) *KumoruClient {
+func (k *KumoruClient) SetDebug(enable bool) {
 	k.Debug = enable
-	return k
 }
 
-func (k *KumoruClient) SetLogger(logger *log.Logger) *KumoruClient {
+func (k *KumoruClient) SetLogger(logger *log.Logger) {
 	k.Logger = logger
-	return k
 }
 
 // Clear KumoruClient data for a new request
@@ -136,78 +132,65 @@ func (k *KumoruClient) ClearKumoruClient() {
 	k.SliceData = []interface{}{}
 }
 
-func (k *KumoruClient) Get(targetUrl string) *KumoruClient {
+func (k *KumoruClient) Get(targetUrl string) {
 	k.ClearKumoruClient()
 	k.Method = GET
 	k.Url = targetUrl
 	k.Errors = nil
-
-	return k
 }
 
-func (k *KumoruClient) Patch(targetUrl string) *KumoruClient {
+func (k *KumoruClient) Patch(targetUrl string) {
 	k.ClearKumoruClient()
 	k.Method = PATCH
 	k.Url = targetUrl
 	k.Errors = nil
-
-	return k
 }
 
-func (k *KumoruClient) Put(targetUrl string) *KumoruClient {
+func (k *KumoruClient) Put(targetUrl string) {
 	k.ClearKumoruClient()
 	k.Method = PUT
 	k.Url = targetUrl
 	k.Errors = nil
-
-	return k
 }
 
-func (k *KumoruClient) Delete(targetUrl string) *KumoruClient {
+func (k *KumoruClient) Delete(targetUrl string) {
 	k.ClearKumoruClient()
 	k.Method = DELETE
 	k.Url = targetUrl
 	k.Errors = nil
-
-	return k
 }
 
-func (k *KumoruClient) Post(targetUrl string) *KumoruClient {
+func (k *KumoruClient) Post(targetUrl string) {
 	k.ClearKumoruClient()
 	k.Method = POST
 	k.Url = targetUrl
 	k.Errors = nil
-
-	return k
 }
 
-func (k *KumoruClient) Head(targetUrl string) *KumoruClient {
+func (k *KumoruClient) Head(targetUrl string) {
 	k.ClearKumoruClient()
 	k.Method = POST
 	k.Url = targetUrl
 	k.Errors = nil
-
-	return k
 }
 
 // SetHeader headers
 // kumoru.New().
 // POST("/application/B8658129-701E-432C-BD80-5D0F464EC932").
 // SetHeader("Accept", "application/x-www-form-urlencoded")
-func (k *KumoruClient) SetHeader(param string, value string) *KumoruClient {
+func (k *KumoruClient) SetHeader(param string, value string) {
 	k.Header[param] = value
-	return k
 }
 
-func (k *KumoruClient) Param(key string, value string) *KumoruClient {
+func (k *KumoruClient) Param(key string, value string) {
 	k.QueryData.Add(key, value)
-	return k
+
 }
 
 // Probably can merge in the initialize section
-func (k *KumoruClient) SetBasicAuth(username string, password string) *KumoruClient {
+func (k *KumoruClient) SetBasicAuth(username string, password string) {
 	k.BasicAuth = struct{ UserName, Password string }{username, password}
-	return k
+
 }
 
 // Query fucntion forms a query-string in the url of GET method or body of POST method.
@@ -230,7 +213,7 @@ func (k *KumoruClient) SetBasicAuth(username string, password string) *KumoruCli
 // Query(`{ sort: 'asc' }`).
 // End()
 
-func (k *KumoruClient) Query(content interface{}) *KumoruClient {
+func (k *KumoruClient) Query(content interface{}) {
 	switch v := reflect.ValueOf(content); v.Kind() {
 
 	case reflect.String:
@@ -239,10 +222,10 @@ func (k *KumoruClient) Query(content interface{}) *KumoruClient {
 		k.queryStruct(v.Interface())
 	default:
 	}
-	return k
+
 }
 
-func (k *KumoruClient) queryString(content string) *KumoruClient {
+func (k *KumoruClient) queryString(content string) {
 	var val map[string]string
 	if err := json.Unmarshal([]byte(content), &val); err == nil {
 		for key, v := range val {
@@ -257,10 +240,10 @@ func (k *KumoruClient) queryString(content string) *KumoruClient {
 			k.Errors = append(k.Errors, err)
 		}
 	}
-	return k
+
 }
 
-func (k *KumoruClient) queryStruct(content interface{}) *KumoruClient {
+func (k *KumoruClient) queryStruct(content interface{}) {
 	if marchalContent, err := json.Marshal(content); err != nil {
 		k.Errors = append(k.Errors, err)
 	} else {
@@ -274,12 +257,12 @@ func (k *KumoruClient) queryStruct(content interface{}) *KumoruClient {
 			}
 		}
 	}
-	return k
+
 }
 
-func (k *KumoruClient) TLSClientConfig(config *tls.Config) *KumoruClient {
+func (k *KumoruClient) TLSClientConfig(config *tls.Config) {
 	k.Transport.TLSClientConfig = config
-	return k
+
 }
 
 // End() or EndBytes() must be called to execute the call otherwise it won't do a thing.

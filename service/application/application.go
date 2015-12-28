@@ -11,59 +11,59 @@ import (
 func Create(poolUuid, certificates, name, image, providerCredentials, metaData string, envVars, rules, ports []string) (*http.Response, string, []error) {
 	k := kumoru.New()
 
-	k = k.Post(fmt.Sprintf("%s/v1/applications/", k.EndPoint.Application))
+	k.Post(fmt.Sprintf("%s/v1/applications/", k.EndPoint.Application))
 
-	k = k.Send(genParameters(certificates, name, image, providerCredentials, metaData, envVars, rules, ports))
+	k.Send(genParameters(certificates, name, image, providerCredentials, metaData, envVars, rules, ports))
 
-	k = k.Send(fmt.Sprintf("pool_uuid=%s&", url.QueryEscape(poolUuid)))
+	k.Send(fmt.Sprintf("pool_uuid=%s&", url.QueryEscape(poolUuid)))
 
-	return k.SignRequest(true).
-		End()
+	k.SignRequest(true)
+
+	return k.End()
 }
 
 func List() (*http.Response, string, []error) {
 	k := kumoru.New()
 
-	return k.Get(fmt.Sprintf("%s/v1/applications/", k.EndPoint.Application)).
-		SignRequest(true).
-		End()
+	k.Get(fmt.Sprintf("%s/v1/applications/", k.EndPoint.Application))
+	k.SignRequest(true)
+	return k.End()
 }
 
 func Show(applicationUuid string) (*http.Response, string, []error) {
 	k := kumoru.New()
 
-	return k.Get(fmt.Sprintf("%s/v1/applications/%s", k.EndPoint.Application, applicationUuid)).
-		SignRequest(true).
-		End()
+	k.Get(fmt.Sprintf("%s/v1/applications/%s", k.EndPoint.Application, applicationUuid))
+	k.SignRequest(true)
+	return k.End()
 }
 
 func Deploy(applicationUuid string) (*http.Response, string, []error) {
 	k := kumoru.New()
 
-	return k.Post(fmt.Sprintf("%s/v1/applications/%s/deployments/", k.EndPoint.Application, applicationUuid)).
-		SignRequest(true).
-		End()
+	k.Post(fmt.Sprintf("%s/v1/applications/%s/deployments/", k.EndPoint.Application, applicationUuid))
+	k.SignRequest(true)
+	return k.End()
 }
 
 func Delete(applicationUuid string) (*http.Response, string, []error) {
 	k := kumoru.New()
 
-	resp, body, errs := k.Delete(fmt.Sprintf("%s/v1/applications/%s", k.EndPoint.Application, applicationUuid)).
-		SignRequest(true).
-		End()
+	k.Delete(fmt.Sprintf("%s/v1/applications/%s", k.EndPoint.Application, applicationUuid))
+	k.SignRequest(true)
+	return k.End()
 
-	return resp, body, errs
 }
 
 func Patch(applicationUuid, certificates, name, image, providerCredentials, metaData string, envVars, rules, ports []string) (*http.Response, string, []error) {
 	k := kumoru.New()
 
-	k = k.Patch(fmt.Sprintf("%s/v1/applications/%s", k.EndPoint.Application, applicationUuid))
+	k.Patch(fmt.Sprintf("%s/v1/applications/%s", k.EndPoint.Application, applicationUuid))
 
-	k = k.Send(genParameters(certificates, name, image, providerCredentials, metaData, envVars, rules, ports))
+	k.Send(genParameters(certificates, name, image, providerCredentials, metaData, envVars, rules, ports))
 
-	return k.SignRequest(true).
-		End()
+	k.SignRequest(true)
+	return k.End()
 }
 
 func genParameters(certificates, name, image, providerCredentials, metaData string, envVars, rules, ports []string) string {

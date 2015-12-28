@@ -15,32 +15,32 @@ func Create(location string, credentials string) (*http.Response, string, []erro
 		k.Logger.Fatal("Update your config with a set of tokens")
 	}
 
-	return k.Post(fmt.Sprintf("%v/v1/pools/", k.EndPoint.Pool)).
-		Send(fmt.Sprintf("location=%s&credentials=%s", url.QueryEscape(location), url.QueryEscape(credentials))).
-		SignRequest(true).
-		End()
+	k.Post(fmt.Sprintf("%v/v1/pools/", k.EndPoint.Pool))
+	k.Send(fmt.Sprintf("location=%s&credentials=%s", url.QueryEscape(location), url.QueryEscape(credentials)))
+	k.SignRequest(true)
+	return k.End()
 }
 
 func List() (*http.Response, string, []error) {
 	k := kumoru.New()
 
-	return k.Get(fmt.Sprintf("%v/v1/pools/", k.EndPoint.Pool)).
-		SignRequest(true).
-		End()
+	k.Get(fmt.Sprintf("%v/v1/pools/", k.EndPoint.Pool))
+	k.SignRequest(true)
+	return k.End()
 }
 
 func Show(uuid string) (*http.Response, string, []error) {
 	k := kumoru.New()
 
-	return k.Get(fmt.Sprintf("%v/v1/pools/%s", k.EndPoint.Pool, uuid)).
-		SignRequest(true).
-		End()
+	k.Get(fmt.Sprintf("%v/v1/pools/%s", k.EndPoint.Pool, uuid))
+	k.SignRequest(true)
+	return k.End()
 }
 
 func Delete(uuid string) (*http.Response, string, []error) {
 	k := kumoru.New()
 
-	return k.Delete(fmt.Sprintf("%v/v1/pools/%s", k.EndPoint.Pool, uuid)).
-		SignRequest(true).
-		End()
+	k.Delete(fmt.Sprintf("%v/v1/pools/%s", k.EndPoint.Pool, uuid))
+	k.SignRequest(true)
+	return k.End()
 }
