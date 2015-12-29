@@ -19,9 +19,9 @@ func LoadEndpoints(filename string, section string) (Endpoints, error) {
 	iniEndpoints, err := config.GetSection(section)
 	if err != nil {
 		return Endpoints{
-			Application:   "https://application.kumoru.io:5000",
-			Authorization: "https://authorization.kumoru.io:5000",
-			Pool:          "https://pool.kumoru.io:5000",
+			Application:   "https://application.kumoru.io",
+			Authorization: "https://authorization.kumoru.io",
+			Pool:          "https://pool.kumoru.io",
 		}, nil
 	}
 
