@@ -1,6 +1,8 @@
 package kumoru
 
 import (
+	"os"
+
 	"gopkg.in/ini.v1"
 )
 
@@ -27,18 +29,20 @@ func LoadTokens(filename string, section string) (Ktokens, error) {
 
 }
 
-func SaveTokens(filename, section string, tokens Ktokens) error {
+func SaveTokens(directory, filename, section string, tokens Ktokens) error {
+	kfile := directory + filename
 
-	config, err := ini.Load(filename)
+	config, err := ini.Load(kfile)
 
 	if err != nil {
+		os.Mkdir(directory, 0755)
 		config = ini.Empty()
 		config.NewSection(section)
 	}
 
 	config.Section(section).NewKey("kumoru_token_public", tokens.Public)
 	config.Section(section).NewKey("kumoru_token_private", tokens.Private)
-	return config.SaveTo(filename)
+	return config.SaveTo(kfile)
 }
 
 func HasTokens(filename, section string) bool {
