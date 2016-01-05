@@ -72,10 +72,7 @@ func New() *KumoruClient {
 
 	}
 
-	e, err := LoadEndpoints(config, "endpoints")
-	if err != nil {
-		log.Fatal(err)
-	}
+	e := LoadEndpoints(config, "endpoints")
 
 	t, err := LoadTokens(config, "tokens")
 	if err != nil {

@@ -8,10 +8,14 @@ type Endpoints struct {
 	Pool          string
 }
 
-func LoadEndpoints(filename string, section string) (Endpoints, error) {
+func LoadEndpoints(filename string, section string) Endpoints {
 	config, err := ini.Load(filename)
 	if err != nil {
-		return Endpoints{}, err
+		return Endpoints{
+			Application:   "https://application.kumoru.io",
+			Authorization: "https://authorization.kumoru.io",
+			Pool:          "https://pool.kumoru.io",
+		}
 	}
 
 	iniEndpoints, err := config.GetSection(section)
@@ -20,12 +24,12 @@ func LoadEndpoints(filename string, section string) (Endpoints, error) {
 			Application:   "https://application.kumoru.io",
 			Authorization: "https://authorization.kumoru.io",
 			Pool:          "https://pool.kumoru.io",
-		}, nil
+		}
 	}
 
 	return Endpoints{
 		Application:   iniEndpoints.Key("kumoru_application_api").String(),
 		Authorization: iniEndpoints.Key("kumoru_authorization_api").String(),
 		Pool:          iniEndpoints.Key("kumoru_pool_api").String(),
-	}, nil
+	}
 }
