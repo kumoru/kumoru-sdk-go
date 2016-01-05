@@ -8,12 +8,12 @@ import (
 	"github.com/kumoru/kumoru-sdk-go/kumoru"
 )
 
-func Create(poolUuid, certificates, name, image, providerCredentials, metaData string, envVars, rules, ports []string) (*http.Response, string, []error) {
+func Create(poolUuid, certificates, name, image, providerCredentials, metaData string, envVars, rules, ports, sslPorts []string) (*http.Response, string, []error) {
 	k := kumoru.New()
 
 	k.Post(fmt.Sprintf("%s/v1/applications/", k.EndPoint.Application))
 
-	k.Send(genParameters(certificates, name, image, providerCredentials, metaData, envVars, rules, ports))
+	k.Send(genParameters(certificates, name, image, providerCredentials, metaData, envVars, rules, ports, sslPorts))
 
 	k.Send(fmt.Sprintf("pool_uuid=%s&", url.QueryEscape(poolUuid)))
 
@@ -55,18 +55,18 @@ func Delete(applicationUuid string) (*http.Response, string, []error) {
 
 }
 
-func Patch(applicationUuid, certificates, name, image, providerCredentials, metaData string, envVars, rules, ports []string) (*http.Response, string, []error) {
+func Patch(applicationUuid, certificates, name, image, providerCredentials, metaData string, envVars, rules, ports, sslPorts []string) (*http.Response, string, []error) {
 	k := kumoru.New()
 
 	k.Patch(fmt.Sprintf("%s/v1/applications/%s", k.EndPoint.Application, applicationUuid))
 
-	k.Send(genParameters(certificates, name, image, providerCredentials, metaData, envVars, rules, ports))
+	k.Send(genParameters(certificates, name, image, providerCredentials, metaData, envVars, rules, ports, sslPorts))
 
 	k.SignRequest(true)
 	return k.End()
 }
 
-func genParameters(certificates, name, image, providerCredentials, metaData string, envVars, rules, ports []string) string {
+func genParameters(certificates, name, image, providerCredentials, metaData string, envVars, rules, ports, sslPorts []string) string {
 	var params string
 
 	if certificates != "" {
@@ -95,6 +95,10 @@ func genParameters(certificates, name, image, providerCredentials, metaData stri
 
 	for _, port := range ports {
 		params += fmt.Sprintf("ports=%s&", url.QueryEscape(port))
+	}
+
+	for _, sslport := range sslPorts {
+		params += fmt.Sprintf("ssl_ports=%s&", url.QueryEscape(sslport))
 	}
 
 	for _, rule := range rules {

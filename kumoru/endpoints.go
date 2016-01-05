@@ -10,7 +10,7 @@ type Endpoints struct {
 
 func LoadEndpoints(filename string, section string) (Endpoints, error) {
 	config, err := ini.Load(filename)
-	if err == nil {
+	if err != nil {
 		return Endpoints{}, err
 	}
 
