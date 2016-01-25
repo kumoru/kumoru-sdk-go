@@ -28,6 +28,13 @@ func CreateAcct(username, given_name, surname, password string) (*http.Response,
 	return k.End()
 }
 
+func ResetPassword(email string) (*http.Response, string, []error) {
+	k := kumoru.New()
+
+	k.Get(fmt.Sprintf("%v/v1/accounts/%v/password/resets/", k.EndPoint.Authorization, email))
+	return k.End()
+}
+
 func ShowAcct(username string) (*http.Response, string, []error) {
 	k := kumoru.New()
 
