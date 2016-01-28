@@ -38,10 +38,10 @@ func Show(applicationUuid string) (*http.Response, string, []error) {
 	return k.End()
 }
 
-func Deploy(applicationUuid string) (*http.Response, string, []error) {
+func Deploy(applicationUuid string, deploymentToken string) (*http.Response, string, []error) {
 	k := kumoru.New()
 
-	k.Post(fmt.Sprintf("%s/v1/applications/%s/deployments/", k.EndPoint.Application, applicationUuid))
+	k.Post(fmt.Sprintf("%s/v1/applications/%s/deployments/?deployment_token=%s", k.EndPoint.Application, applicationUuid, url.QueryEscape(deploymentToken)))
 	k.SignRequest(true)
 	return k.End()
 }
