@@ -310,7 +310,9 @@ func (k *KumoruClient) EndBytes(callback ...func(response Response, body []byte,
 			req.SetBasicAuth(k.BasicAuth.UserName, k.BasicAuth.Password)
 		}
 	} else {
-		date := time.Now()
+		date := time.Now().UTC()
+		compliantDate := fmt.Sprintf(date.Format(time.RFC822Z))
+
 		signingString := k.Method + "\n"
 
 		d, err := ioutil.ReadAll(strings.NewReader(k.RawString))
@@ -327,8 +329,8 @@ func (k *KumoruClient) EndBytes(callback ...func(response Response, body []byte,
 		}
 
 		u, _ := url.Parse(k.Url)
-		signingString += "x-kumoru-date:" + date.String() + "\n" + u.Path
-		req.Header.Set("X-Kumoru-Date", date.String())
+		signingString += "x-kumoru-date:" + compliantDate + "\n" + u.Path
+		req.Header.Set("X-Kumoru-Date", compliantDate)
 
 		h := hmac.New(sha256.New, []byte(k.Tokens.Private))
 		h.Write([]byte(signingString))

@@ -39,5 +39,6 @@ func ShowAcct(username string) (*http.Response, string, []error) {
 	k := kumoru.New()
 
 	k.Get(fmt.Sprintf("%v/v1/accounts/%v", k.EndPoint.Authorization, username))
+	k.SignRequest(true)
 	return k.End()
 }
