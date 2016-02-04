@@ -10,8 +10,10 @@ import (
 )
 
 type Secret struct {
-	Value string `"json: value"`
-	Uuid  string `"json: uuid"`
+	CreatedAt string `"json: created_at"`
+	Value     string `"json: value"`
+	UpdatedAt string `"json: updated_at"`
+	Uuid      string `"json: uuid"`
 }
 
 // Create is a Secret method that will create a secret with the specified value
