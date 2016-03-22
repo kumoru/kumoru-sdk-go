@@ -24,6 +24,7 @@ import (
 	"github.com/kumoru/kumoru-sdk-go/RootCAs"
 )
 
+// Constant Methods
 const (
 	POST   = "POST"
 	GET    = "GET"
@@ -34,11 +35,13 @@ const (
 )
 
 type (
-	Request  *http.Request
+	// Request declaration
+	Request *http.Request
+	// Response declaration
 	Response *http.Response
 
+	// KumoruClient declartation
 	KumoruClient struct {
-		SliceData         []interface{}
 		BasicAuth         struct{ UserName, Password string }
 		BounceToRawString bool
 		Client            *http.Client
@@ -50,17 +53,19 @@ type (
 		Header            map[string]string
 		Logger            *log.Logger
 		Method            string
+		ProxyRequestData  *http.Request
 		QueryData         url.Values
 		RawString         string
 		Sign              bool
+		SliceData         []interface{}
 		TargetType        string
 		Tokens            *Ktokens
 		Transport         *http.Transport
-		Url               string
+		URL               string
 	}
 )
 
-// Used to create a new KumoruClient Object.
+// New creates a KumoruClient Object.
 func New() *KumoruClient {
 
 	config := os.Getenv("KUMORU_CONFIG")
@@ -79,41 +84,55 @@ func New() *KumoruClient {
 		log.Warning("No tokens found...")
 	}
 
+	envDebug := false
+	if strings.ToLower(os.Getenv("KUMORU_SDK_DEBUG")) == "true" {
+		envDebug = true
+	}
+
+	logger := log.New()
+
+	logger.Info("Config file: %s", config)
+	logger.Info("Endpoints: %+v", e)
+
 	return &KumoruClient{
 		BounceToRawString: false,
 		Client:            &http.Client{},
 		Data:              make(map[string]interface{}),
-		Debug:             false,
-		SliceData:         []interface{}{},
+		Debug:             envDebug,
 		EndPoint:          &e,
 		Errors:            nil,
 		FormData:          url.Values{},
 		Header:            make(map[string]string),
-		Logger:            log.New(),
+		Logger:            logger,
+		ProxyRequestData:  nil,
 		QueryData:         url.Values{},
 		RawString:         "",
 		Sign:              false,
+		SliceData:         []interface{}{},
 		TargetType:        "form",
 		Tokens:            &t,
 		Transport:         &http.Transport{},
-		Url:               "",
+		URL:               "",
 	}
 
 }
 
+// SignRequest enables kumoru's authentication
 func (k *KumoruClient) SignRequest(enable bool) {
 	k.Sign = enable
 }
 
+// SetDebug enables debugging
 func (k *KumoruClient) SetDebug(enable bool) {
 	k.Debug = enable
 }
 
+// SetLogger enable logger
 func (k *KumoruClient) SetLogger(logger *log.Logger) {
 	k.Logger = logger
 }
 
-// Clear KumoruClient data for a new request
+// ClearKumoruClient clears data for a new request
 func (k *KumoruClient) ClearKumoruClient() {
 	k.BounceToRawString = false
 	k.Data = make(map[string]interface{})
@@ -125,49 +144,55 @@ func (k *KumoruClient) ClearKumoruClient() {
 	k.RawString = ""
 	k.Sign = false
 	k.TargetType = "form"
-	k.Url = ""
+	k.URL = ""
 	k.SliceData = []interface{}{}
 }
 
-func (k *KumoruClient) Get(targetUrl string) {
+// Get method
+func (k *KumoruClient) Get(targetURL string) {
 	k.ClearKumoruClient()
 	k.Method = GET
-	k.Url = targetUrl
+	k.URL = targetURL
 	k.Errors = nil
 }
 
-func (k *KumoruClient) Patch(targetUrl string) {
+// Patch method
+func (k *KumoruClient) Patch(targetURL string) {
 	k.ClearKumoruClient()
 	k.Method = PATCH
-	k.Url = targetUrl
+	k.URL = targetURL
 	k.Errors = nil
 }
 
-func (k *KumoruClient) Put(targetUrl string) {
+// Put method
+func (k *KumoruClient) Put(targetURL string) {
 	k.ClearKumoruClient()
 	k.Method = PUT
-	k.Url = targetUrl
+	k.URL = targetURL
 	k.Errors = nil
 }
 
-func (k *KumoruClient) Delete(targetUrl string) {
+// Delete method
+func (k *KumoruClient) Delete(targetURL string) {
 	k.ClearKumoruClient()
 	k.Method = DELETE
-	k.Url = targetUrl
+	k.URL = targetURL
 	k.Errors = nil
 }
 
-func (k *KumoruClient) Post(targetUrl string) {
+// Post method
+func (k *KumoruClient) Post(targetURL string) {
 	k.ClearKumoruClient()
 	k.Method = POST
-	k.Url = targetUrl
+	k.URL = targetURL
 	k.Errors = nil
 }
 
-func (k *KumoruClient) Head(targetUrl string) {
+// Head method
+func (k *KumoruClient) Head(targetURL string) {
 	k.ClearKumoruClient()
 	k.Method = POST
-	k.Url = targetUrl
+	k.URL = targetURL
 	k.Errors = nil
 }
 
@@ -179,12 +204,13 @@ func (k *KumoruClient) SetHeader(param string, value string) {
 	k.Header[param] = value
 }
 
+// Param function adds a key value pair to the list of parameters
 func (k *KumoruClient) Param(key string, value string) {
 	k.QueryData.Add(key, value)
 
 }
 
-// Probably can merge in the initialize section
+// SetBasicAuth user name and password
 func (k *KumoruClient) SetBasicAuth(username string, password string) {
 	k.BasicAuth = struct{ UserName, Password string }{username, password}
 
@@ -209,7 +235,6 @@ func (k *KumoruClient) SetBasicAuth(username string, password string) {
 // Query("query=myapp&limit=5").
 // Query(`{ sort: 'asc' }`).
 // End()
-
 func (k *KumoruClient) Query(content interface{}) {
 	switch v := reflect.ValueOf(content); v.Kind() {
 
@@ -230,7 +255,7 @@ func (k *KumoruClient) queryString(content string) {
 		}
 	} else {
 		if queryVal, err := url.ParseQuery(content); err == nil {
-			for key, _ := range queryVal {
+			for key := range queryVal {
 				k.QueryData.Add(key, queryVal.Get(key))
 			}
 		} else {
@@ -257,12 +282,47 @@ func (k *KumoruClient) queryStruct(content interface{}) {
 
 }
 
+// TLSClientConfig set TLS configuration
 func (k *KumoruClient) TLSClientConfig(config *tls.Config) {
 	k.Transport.TLSClientConfig = config
 
 }
 
-// End() or EndBytes() must be called to execute the call otherwise it won't do a thing.
+// ProxyRequest set ProxyRequest Headers
+func (k *KumoruClient) ProxyRequest(r *http.Request) {
+	k.ProxyRequestData = r
+}
+
+func genProxyRequestHeaders(r *http.Request) string {
+	components := r.Method + "\n"
+
+	for _, value := range []string{"Content-MD5", "Content-Type", "Proxy-Authorization"} {
+		if r.Header.Get(value) != "" {
+			components += fmt.Sprintf("%s:%s\n", strings.ToLower(value), r.Header.Get(value))
+		}
+	}
+
+	for k, v := range r.Header {
+		fmt.Println("Header:", k, "Value:", v)
+
+	}
+
+	if r.Header.Get("X-Kumoru-Date") == "" {
+		components += fmt.Sprintf("date:%s\n", r.Header.Get("Date")) + r.URL.Path
+	} else {
+		components += fmt.Sprintf("x-kumoru-date:%s\n", r.Header.Get("X-Kumoru-Date")) + r.URL.Path
+	}
+
+	tmpAuthHeader, err := base64.StdEncoding.DecodeString(r.Header.Get("Authorization"))
+	if err != nil {
+		return ""
+	}
+	fmt.Println("components: ", components)
+
+	return base64.StdEncoding.EncodeToString([]byte(string(tmpAuthHeader) + ":" + base64.StdEncoding.EncodeToString([]byte(components))))
+}
+
+// End or EndBytes() must be called to execute the call otherwise it won't do a thing.
 func (k *KumoruClient) End(callback ...func(response Response, body string, errs []error)) (Response, string, []error) {
 	var bytesCallback []func(response Response, body []byte, errs []error)
 	if len(callback) > 0 {
@@ -315,26 +375,41 @@ func (k *KumoruClient) EndBytes(callback ...func(response Response, body []byte,
 
 		signingString := k.Method + "\n"
 
-		d, err := ioutil.ReadAll(strings.NewReader(k.RawString))
+		d, readErr := ioutil.ReadAll(strings.NewReader(k.RawString))
 
-		if err != nil {
+		if readErr != nil {
 			log.Fatal(err)
 		}
 		if len(d) != 0 {
 			md5Sum := md5.Sum(d)
 			req.Header.Set("Content-MD5", fmt.Sprintf("%x", string(md5Sum[:16])))
 
-			signingString += fmt.Sprintf("content-md5:%x", string(md5Sum[:16])) + "\n"
-			signingString += fmt.Sprintf("content-type:%v", req.Header.Get("Content-Type")+"\n")
+			signingString += fmt.Sprintf("content-md5:%v\n", req.Header.Get("Content-MD5")+"\n")
+			signingString += fmt.Sprintf("content-type:%v\n", req.Header.Get("Content-Type")+"\n")
 		}
 
-		u, _ := url.Parse(k.Url)
+		if k.ProxyRequestData != nil {
+			req.Header.Set("Proxy-Authorization", genProxyRequestHeaders(k.ProxyRequestData))
+			k.Logger.Println("Proxy-Authorization: ", req.Header.Get("Proxy-Authorization"))
+			signingString += fmt.Sprintf("proxy-authorization:%v\n", req.Header.Get("Proxy-Authorization"))
+
+			if k.ProxyRequestData.Header.Get("X-Kumoru-Context") != "" {
+				req.Header.Set("X-Kumoru-Context", k.ProxyRequestData.Header.Get("X-Kumoru-Context"))
+				k.Logger.Println("X-Kumoru-Context: ", k.ProxyRequestData.Header.Get("X-Kumoru-Context"))
+				signingString += fmt.Sprintf("x-kumoru-context:%v\n", req.Header.Get("x-kumoru-context"))
+			}
+		}
+
+		u, _ := url.Parse(k.URL)
 		signingString += "x-kumoru-date:" + compliantDate + "\n" + u.Path
 		req.Header.Set("X-Kumoru-Date", compliantDate)
 
 		h := hmac.New(sha256.New, []byte(k.Tokens.Private))
 		h.Write([]byte(signingString))
 		digest := fmt.Sprintf("%x", h.Sum(nil))
+
+		k.Logger.Println("My Digest: ", digest)
+		k.Logger.Println("siginignString: ", signingString)
 
 		req.Header.Set("Authorization", base64.StdEncoding.EncodeToString([]byte(k.Tokens.Public+":"+digest)))
 	}
@@ -351,8 +426,8 @@ func (k *KumoruClient) EndBytes(callback ...func(response Response, body []byte,
 
 	// Log details of this request
 	if k.Debug {
-		dump, err := httputil.DumpRequest(req, true)
-		if err != nil {
+		dump, logErr := httputil.DumpRequest(req, true)
+		if logErr != nil {
 			k.Logger.Println("Error:", err)
 		} else {
 			k.Logger.Printf("HTTP Request: %s", string(dump))
@@ -389,22 +464,22 @@ func (k *KumoruClient) EndBytes(callback ...func(response Response, body []byte,
 }
 
 func changeMapToURLValues(data map[string]interface{}) url.Values {
-	var newUrlValues = url.Values{}
+	var newURLValues = url.Values{}
 	for k, v := range data {
 		switch val := v.(type) {
 		case string:
-			newUrlValues.Add(k, val)
+			newURLValues.Add(k, val)
 		case []string:
 			for _, element := range val {
-				newUrlValues.Add(k, element)
+				newURLValues.Add(k, element)
 			}
 		// if a number, change to string
 		// json.Number used to protect against a wrong (for GoRequest) default conversion
 		// which always converts number to float64.
 		// This type is caused by using Decoder.UseNumber()
 		case json.Number:
-			newUrlValues.Add(k, string(val))
+			newURLValues.Add(k, string(val))
 		}
 	}
-	return newUrlValues
+	return newURLValues
 }

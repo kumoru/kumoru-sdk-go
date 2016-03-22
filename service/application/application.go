@@ -12,11 +12,8 @@ func Create(poolUuid, certificates, name, image, providerCredentials, metaData s
 	k := kumoru.New()
 
 	k.Post(fmt.Sprintf("%s/v1/applications/", k.EndPoint.Application))
-
 	k.Send(genParameters(certificates, name, image, providerCredentials, metaData, envVars, rules, ports, sslPorts))
-
 	k.Send(fmt.Sprintf("pool_uuid=%s&", url.QueryEscape(poolUuid)))
-
 	k.SignRequest(true)
 
 	return k.End()
@@ -52,16 +49,13 @@ func Delete(applicationUuid string) (*http.Response, string, []error) {
 	k.Delete(fmt.Sprintf("%s/v1/applications/%s", k.EndPoint.Application, applicationUuid))
 	k.SignRequest(true)
 	return k.End()
-
 }
 
 func Patch(applicationUuid, certificates, name, image, providerCredentials, metaData string, envVars, rules, ports, sslPorts []string) (*http.Response, string, []error) {
 	k := kumoru.New()
 
 	k.Patch(fmt.Sprintf("%s/v1/applications/%s", k.EndPoint.Application, applicationUuid))
-
 	k.Send(genParameters(certificates, name, image, providerCredentials, metaData, envVars, rules, ports, sslPorts))
-
 	k.SignRequest(true)
 	return k.End()
 }

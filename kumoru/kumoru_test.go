@@ -12,8 +12,8 @@ import (
 func TestKumoruGet(t *testing.T) {
 	os.Clearenv()
 	os.Setenv("KUMORU_CONFIG", "example-cfg.ini")
-	const case1_empty = "/v1/pools/"
-	const case2_set_header = "/v1/applications/"
+	const case1Empty = "/v1/pools/"
+	const case2SetHeader = "/v1/applications/"
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// check method is GET before going to check other features
@@ -27,10 +27,10 @@ func TestKumoruGet(t *testing.T) {
 
 		default:
 			t.Errorf("No testing for this case yet : %q", r.URL.Path)
-		case case1_empty:
-			t.Logf("case %v ", case1_empty)
-		case case2_set_header:
-			t.Logf("case %v ", case2_set_header)
+		case case1Empty:
+			t.Logf("case %v ", case1Empty)
+		case case2SetHeader:
+			t.Logf("case %v ", case2SetHeader)
 			if r.Header.Get("Custom-Header") != "fookey" {
 				t.Errorf("Expected 'Custom-Header' == %q; got %q", "fookey", r.Header.Get("Custom-Header"))
 			}
@@ -39,12 +39,13 @@ func TestKumoruGet(t *testing.T) {
 
 	defer ts.Close()
 
-	New().Get(ts.URL + case1_empty).
-		End()
+	k := New()
+	k.Get(ts.URL + case1Empty)
+	k.End()
 
-	New().Get(ts.URL+case2_set_header).
-		SetHeader("Custom-Header", "fookey").
-		End()
+	k.Get(ts.URL + case2SetHeader)
+	k.SetHeader("Custom-Header", "fookey")
+	k.End()
 
 	os.Clearenv()
 }
@@ -54,10 +55,10 @@ func TestKumoruPost(t *testing.T) {
 	os.Clearenv()
 	os.Setenv("KUMORU_CONFIG", "example-cfg.ini")
 	const (
-		case1_empty      = "/v1/pools/"
-		case2_set_header = "/v1/applications/"
-		case3_set_query  = "/v1/accounts/"
-		case4_send       = "/v1/accounts/victor@kumoru.io"
+		case1Empty     = "/v1/pools/"
+		case2SetHeader = "/v1/applications/"
+		case3SetQuery  = "/v1/accounts/"
+		case4Send      = "/v1/accounts/victor@kumoru.io"
 	)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -72,21 +73,21 @@ func TestKumoruPost(t *testing.T) {
 
 		default:
 			t.Errorf("No testing for this case yet : %q", r.URL.Path)
-		case case1_empty:
-			t.Logf("case %v ", case1_empty)
-		case case2_set_header:
-			t.Logf("case %v ", case2_set_header)
+		case case1Empty:
+			t.Logf("case %v ", case1Empty)
+		case case2SetHeader:
+			t.Logf("case %v ", case2SetHeader)
 			if r.Header.Get("Custom-Header") != "fookey" {
 				t.Errorf("Expected 'Custom-Header' == %q; got %q", "fookey", r.Header.Get("Custom-Header"))
 			}
-		case case3_set_query:
-			t.Logf("case %v ", case3_set_query)
+		case case3SetQuery:
+			t.Logf("case %v ", case3SetQuery)
 			v := r.URL.Query()
 			if v["rules"][0] != "latest:100" {
 				t.Error("Expected latest:100", "| but got", v["rules"][0])
 			}
-		case case4_send:
-			t.Logf("case %v ", case4_send)
+		case case4Send:
+			t.Logf("case %v ", case4Send)
 			defer r.Body.Close()
 			body, _ := ioutil.ReadAll(r.Body)
 			if string(body) != "rules=latest:100" {
@@ -97,20 +98,21 @@ func TestKumoruPost(t *testing.T) {
 
 	defer ts.Close()
 
-	New().Post(ts.URL + case1_empty).
-		End()
+	k := New()
+	k.Post(ts.URL + case1Empty)
+	k.End()
 
-	New().Post(ts.URL+case2_set_header).
-		SetHeader("Custom-Header", "fookey").
-		End()
+	k.Post(ts.URL + case2SetHeader)
+	k.SetHeader("Custom-Header", "fookey")
+	k.End()
 
-	New().Post(ts.URL + case3_set_query).
-		Query("rules=latest:100").
-		End()
+	k.Post(ts.URL + case3SetQuery)
+	k.Query("rules=latest:100")
+	k.End()
 
-	New().Post(ts.URL + case4_send).
-		Send("rules=latest:100").
-		End()
+	k.Post(ts.URL + case4Send)
+	k.Send("rules=latest:100")
+	k.End()
 
 	os.Clearenv()
 }
@@ -120,10 +122,10 @@ func TestKumoruPut(t *testing.T) {
 	os.Clearenv()
 	os.Setenv("KUMORU_CONFIG", "example-cfg.ini")
 	const (
-		case1_empty      = "/v1/pools/"
-		case2_set_header = "/v1/applications/"
-		case3_set_query  = "/v1/accounts/"
-		case4_send       = "/v1/accounts/victor@kumoru.io"
+		case1Empty     = "/v1/pools/"
+		case2SetHeader = "/v1/applications/"
+		case3SetQuery  = "/v1/accounts/"
+		case4Send      = "/v1/accounts/victor@kumoru.io"
 	)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -138,21 +140,21 @@ func TestKumoruPut(t *testing.T) {
 
 		default:
 			t.Errorf("No testing for this case yet : %q", r.URL.Path)
-		case case1_empty:
-			t.Logf("case %v ", case1_empty)
-		case case2_set_header:
-			t.Logf("case %v ", case2_set_header)
+		case case1Empty:
+			t.Logf("case %v ", case1Empty)
+		case case2SetHeader:
+			t.Logf("case %v ", case2SetHeader)
 			if r.Header.Get("Custom-Header") != "fookey" {
 				t.Errorf("Expected 'Custom-Header' == %q; got %q", "fookey", r.Header.Get("Custom-Header"))
 			}
-		case case3_set_query:
-			t.Logf("case %v ", case3_set_query)
+		case case3SetQuery:
+			t.Logf("case %v ", case3SetQuery)
 			v := r.URL.Query()
 			if v["rules"][0] != "latest:100" {
 				t.Error("Expected latest:100", "| but got", v["rules"][0])
 			}
-		case case4_send:
-			t.Logf("case %v ", case4_send)
+		case case4Send:
+			t.Logf("case %v ", case4Send)
 			defer r.Body.Close()
 			body, _ := ioutil.ReadAll(r.Body)
 			if string(body) != "rules=latest:100" {
@@ -163,20 +165,21 @@ func TestKumoruPut(t *testing.T) {
 
 	defer ts.Close()
 
-	New().Put(ts.URL + case1_empty).
-		End()
+	k := New()
+	k.Put(ts.URL + case1Empty)
+	k.End()
 
-	New().Put(ts.URL+case2_set_header).
-		SetHeader("Custom-Header", "fookey").
-		End()
+	k.Put(ts.URL + case2SetHeader)
+	k.SetHeader("Custom-Header", "fookey")
+	k.End()
 
-	New().Put(ts.URL + case3_set_query).
-		Query("rules=latest:100").
-		End()
+	k.Put(ts.URL + case3SetQuery)
+	k.Query("rules=latest:100")
+	k.End()
 
-	New().Put(ts.URL + case4_send).
-		Send("rules=latest:100").
-		End()
+	k.Put(ts.URL + case4Send)
+	k.Send("rules=latest:100")
+	k.End()
 
 	os.Clearenv()
 }

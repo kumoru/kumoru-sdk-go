@@ -6,11 +6,13 @@ import (
 	"gopkg.in/ini.v1"
 )
 
+// Ktokens contains public and private tokens
 type Ktokens struct {
 	Public  string
 	Private string
 }
 
+// LoadTokens from a file returning a struct of type Ktokens
 func LoadTokens(filename string, section string) (Ktokens, error) {
 	config, err := ini.Load(filename)
 	if err != nil {
@@ -29,6 +31,7 @@ func LoadTokens(filename string, section string) (Ktokens, error) {
 
 }
 
+// SaveTokens writes tokens to a file
 func SaveTokens(directory, filename, section string, tokens Ktokens) error {
 	kfile := directory + filename
 
@@ -45,6 +48,7 @@ func SaveTokens(directory, filename, section string, tokens Ktokens) error {
 	return config.SaveTo(kfile)
 }
 
+// HasTokens checks a file to make sure there are tokens stored
 func HasTokens(filename, section string) bool {
 	config, err := ini.Load(filename)
 	if err != nil {

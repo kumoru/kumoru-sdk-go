@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// Send a string or a struct as parameters
 func (k *KumoruClient) Send(content interface{}) *KumoruClient {
 	switch v := reflect.ValueOf(content); v.Kind() {
 	case reflect.String:
@@ -62,6 +63,7 @@ func (k *KumoruClient) SendString(content string) *KumoruClient {
 	return k
 }
 
+// SendStruct converts a struct to parameters
 func (k *KumoruClient) SendStruct(content interface{}) *KumoruClient {
 	if marshalContent, err := json.Marshal(content); err != nil {
 		k.Errors = append(k.Errors, err)
