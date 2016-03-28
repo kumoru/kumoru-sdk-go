@@ -7,18 +7,19 @@ import (
 	"strings"
 )
 
-func (k *KumoruClient) NewRequest() (*http.Request, error) {
+// NewRequest sets the appropriate header and appropriate request content
+func (k *Client) NewRequest() (*http.Request, error) {
 	switch k.Method {
 	case POST, PUT, PATCH:
 		if k.TargetType == "json" {
 
-			var contentJson []byte
+			var contentJSON []byte
 
 			if len(k.Data) != 0 {
-				contentJson, _ = json.Marshal(k.Data)
+				contentJSON, _ = json.Marshal(k.Data)
 			}
 
-			contentReader := bytes.NewReader(contentJson)
+			contentReader := bytes.NewReader(contentJSON)
 			req, err := http.NewRequest(k.Method, k.URL, contentReader)
 			req.Header.Set("Content-Type", "application/json")
 			return req, err

@@ -40,8 +40,8 @@ type (
 	// Response declaration
 	Response *http.Response
 
-	// KumoruClient declartation
-	KumoruClient struct {
+	// Client declartation
+	Client struct {
 		BasicAuth         struct{ UserName, Password string }
 		BounceToRawString bool
 		Client            *http.Client
@@ -65,8 +65,8 @@ type (
 	}
 )
 
-// New creates a KumoruClient Object.
-func New() *KumoruClient {
+// New creates a Client Object.
+func New() *Client {
 
 	config := os.Getenv("KUMORU_CONFIG")
 
@@ -91,10 +91,7 @@ func New() *KumoruClient {
 
 	logger := log.New()
 
-	logger.Info("Config file: %s", config)
-	logger.Info("Endpoints: %+v", e)
-
-	return &KumoruClient{
+	return &Client{
 		BounceToRawString: false,
 		Client:            &http.Client{},
 		Data:              make(map[string]interface{}),
@@ -118,22 +115,22 @@ func New() *KumoruClient {
 }
 
 // SignRequest enables kumoru's authentication
-func (k *KumoruClient) SignRequest(enable bool) {
+func (k *Client) SignRequest(enable bool) {
 	k.Sign = enable
 }
 
 // SetDebug enables debugging
-func (k *KumoruClient) SetDebug(enable bool) {
+func (k *Client) SetDebug(enable bool) {
 	k.Debug = enable
 }
 
 // SetLogger enable logger
-func (k *KumoruClient) SetLogger(logger *log.Logger) {
+func (k *Client) SetLogger(logger *log.Logger) {
 	k.Logger = logger
 }
 
-// ClearKumoruClient clears data for a new request
-func (k *KumoruClient) ClearKumoruClient() {
+// ClearClient clears data for a new request
+func (k *Client) ClearClient() {
 	k.BounceToRawString = false
 	k.Data = make(map[string]interface{})
 	k.Errors = nil
@@ -149,48 +146,48 @@ func (k *KumoruClient) ClearKumoruClient() {
 }
 
 // Get method
-func (k *KumoruClient) Get(targetURL string) {
-	k.ClearKumoruClient()
+func (k *Client) Get(targetURL string) {
+	k.ClearClient()
 	k.Method = GET
 	k.URL = targetURL
 	k.Errors = nil
 }
 
 // Patch method
-func (k *KumoruClient) Patch(targetURL string) {
-	k.ClearKumoruClient()
+func (k *Client) Patch(targetURL string) {
+	k.ClearClient()
 	k.Method = PATCH
 	k.URL = targetURL
 	k.Errors = nil
 }
 
 // Put method
-func (k *KumoruClient) Put(targetURL string) {
-	k.ClearKumoruClient()
+func (k *Client) Put(targetURL string) {
+	k.ClearClient()
 	k.Method = PUT
 	k.URL = targetURL
 	k.Errors = nil
 }
 
 // Delete method
-func (k *KumoruClient) Delete(targetURL string) {
-	k.ClearKumoruClient()
+func (k *Client) Delete(targetURL string) {
+	k.ClearClient()
 	k.Method = DELETE
 	k.URL = targetURL
 	k.Errors = nil
 }
 
 // Post method
-func (k *KumoruClient) Post(targetURL string) {
-	k.ClearKumoruClient()
+func (k *Client) Post(targetURL string) {
+	k.ClearClient()
 	k.Method = POST
 	k.URL = targetURL
 	k.Errors = nil
 }
 
 // Head method
-func (k *KumoruClient) Head(targetURL string) {
-	k.ClearKumoruClient()
+func (k *Client) Head(targetURL string) {
+	k.ClearClient()
 	k.Method = POST
 	k.URL = targetURL
 	k.Errors = nil
@@ -200,18 +197,18 @@ func (k *KumoruClient) Head(targetURL string) {
 // kumoru.New().
 // POST("/application/B8658129-701E-432C-BD80-5D0F464EC932").
 // SetHeader("Accept", "application/x-www-form-urlencoded")
-func (k *KumoruClient) SetHeader(param string, value string) {
+func (k *Client) SetHeader(param string, value string) {
 	k.Header[param] = value
 }
 
 // Param function adds a key value pair to the list of parameters
-func (k *KumoruClient) Param(key string, value string) {
+func (k *Client) Param(key string, value string) {
 	k.QueryData.Add(key, value)
 
 }
 
 // SetBasicAuth user name and password
-func (k *KumoruClient) SetBasicAuth(username string, password string) {
+func (k *Client) SetBasicAuth(username string, password string) {
 	k.BasicAuth = struct{ UserName, Password string }{username, password}
 
 }
@@ -235,7 +232,7 @@ func (k *KumoruClient) SetBasicAuth(username string, password string) {
 // Query("query=myapp&limit=5").
 // Query(`{ sort: 'asc' }`).
 // End()
-func (k *KumoruClient) Query(content interface{}) {
+func (k *Client) Query(content interface{}) {
 	switch v := reflect.ValueOf(content); v.Kind() {
 
 	case reflect.String:
@@ -247,7 +244,7 @@ func (k *KumoruClient) Query(content interface{}) {
 
 }
 
-func (k *KumoruClient) queryString(content string) {
+func (k *Client) queryString(content string) {
 	var val map[string]string
 	if err := json.Unmarshal([]byte(content), &val); err == nil {
 		for key, v := range val {
@@ -265,7 +262,7 @@ func (k *KumoruClient) queryString(content string) {
 
 }
 
-func (k *KumoruClient) queryStruct(content interface{}) {
+func (k *Client) queryStruct(content interface{}) {
 	if marchalContent, err := json.Marshal(content); err != nil {
 		k.Errors = append(k.Errors, err)
 	} else {
@@ -283,28 +280,23 @@ func (k *KumoruClient) queryStruct(content interface{}) {
 }
 
 // TLSClientConfig set TLS configuration
-func (k *KumoruClient) TLSClientConfig(config *tls.Config) {
+func (k *Client) TLSClientConfig(config *tls.Config) {
 	k.Transport.TLSClientConfig = config
 
 }
 
 // ProxyRequest set ProxyRequest Headers
-func (k *KumoruClient) ProxyRequest(r *http.Request) {
+func (k *Client) ProxyRequest(r *http.Request) {
 	k.ProxyRequestData = r
 }
 
-func genProxyRequestHeaders(r *http.Request) string {
+func genProxyRequestHeader(r *http.Request) string {
 	components := r.Method + "\n"
 
 	for _, value := range []string{"Content-MD5", "Content-Type", "Proxy-Authorization"} {
 		if r.Header.Get(value) != "" {
 			components += fmt.Sprintf("%s:%s\n", strings.ToLower(value), r.Header.Get(value))
 		}
-	}
-
-	for k, v := range r.Header {
-		fmt.Println("Header:", k, "Value:", v)
-
 	}
 
 	if r.Header.Get("X-Kumoru-Date") == "" {
@@ -317,13 +309,13 @@ func genProxyRequestHeaders(r *http.Request) string {
 	if err != nil {
 		return ""
 	}
-	fmt.Println("components: ", components)
+	fmt.Println("genProxyRequestHeaders.components: ", components)
 
 	return base64.StdEncoding.EncodeToString([]byte(string(tmpAuthHeader) + ":" + base64.StdEncoding.EncodeToString([]byte(components))))
 }
 
 // End or EndBytes() must be called to execute the call otherwise it won't do a thing.
-func (k *KumoruClient) End(callback ...func(response Response, body string, errs []error)) (Response, string, []error) {
+func (k *Client) End(callback ...func(response Response, body string, errs []error)) (Response, string, []error) {
 	var bytesCallback []func(response Response, body []byte, errs []error)
 	if len(callback) > 0 {
 		bytesCallback = []func(response Response, body []byte, errs []error){
@@ -338,7 +330,7 @@ func (k *KumoruClient) End(callback ...func(response Response, body string, errs
 }
 
 // EndBytes should be used when you want the body as bytes.
-func (k *KumoruClient) EndBytes(callback ...func(response Response, body []byte, errs []error)) (Response, []byte, []error) {
+func (k *Client) EndBytes(callback ...func(response Response, body []byte, errs []error)) (Response, []byte, []error) {
 	// check whether there is an error. if yes, return all errors
 	if len(k.Errors) != 0 {
 		return nil, nil, k.Errors
@@ -370,6 +362,7 @@ func (k *KumoruClient) EndBytes(callback ...func(response Response, body []byte,
 			req.SetBasicAuth(k.BasicAuth.UserName, k.BasicAuth.Password)
 		}
 	} else {
+
 		date := time.Now().UTC()
 		compliantDate := fmt.Sprintf(date.Format(time.RFC822Z))
 
@@ -378,38 +371,37 @@ func (k *KumoruClient) EndBytes(callback ...func(response Response, body []byte,
 		d, readErr := ioutil.ReadAll(strings.NewReader(k.RawString))
 
 		if readErr != nil {
-			log.Fatal(err)
+			k.Logger.Fatal(err)
 		}
+
 		if len(d) != 0 {
 			md5Sum := md5.Sum(d)
 			req.Header.Set("Content-MD5", fmt.Sprintf("%x", string(md5Sum[:16])))
 
-			signingString += fmt.Sprintf("content-md5:%v\n", req.Header.Get("Content-MD5")+"\n")
-			signingString += fmt.Sprintf("content-type:%v\n", req.Header.Get("Content-Type")+"\n")
+			signingString += fmt.Sprintf("content-md5:%v\n", req.Header.Get("Content-MD5"))
+			signingString += fmt.Sprintf("content-type:%v\n", req.Header.Get("Content-Type"))
 		}
 
 		if k.ProxyRequestData != nil {
-			req.Header.Set("Proxy-Authorization", genProxyRequestHeaders(k.ProxyRequestData))
-			k.Logger.Println("Proxy-Authorization: ", req.Header.Get("Proxy-Authorization"))
+			req.Header.Set("Proxy-Authorization", genProxyRequestHeader(k.ProxyRequestData))
 			signingString += fmt.Sprintf("proxy-authorization:%v\n", req.Header.Get("Proxy-Authorization"))
 
 			if k.ProxyRequestData.Header.Get("X-Kumoru-Context") != "" {
 				req.Header.Set("X-Kumoru-Context", k.ProxyRequestData.Header.Get("X-Kumoru-Context"))
-				k.Logger.Println("X-Kumoru-Context: ", k.ProxyRequestData.Header.Get("X-Kumoru-Context"))
 				signingString += fmt.Sprintf("x-kumoru-context:%v\n", req.Header.Get("x-kumoru-context"))
 			}
+
+			k.Logger.Info("signingString", signingString)
 		}
 
 		u, _ := url.Parse(k.URL)
+		k.Logger.Info("k.Url", k.URL)
 		signingString += "x-kumoru-date:" + compliantDate + "\n" + u.Path
 		req.Header.Set("X-Kumoru-Date", compliantDate)
 
 		h := hmac.New(sha256.New, []byte(k.Tokens.Private))
 		h.Write([]byte(signingString))
 		digest := fmt.Sprintf("%x", h.Sum(nil))
-
-		k.Logger.Println("My Digest: ", digest)
-		k.Logger.Println("siginignString: ", signingString)
 
 		req.Header.Set("Authorization", base64.StdEncoding.EncodeToString([]byte(k.Tokens.Public+":"+digest)))
 	}
@@ -427,11 +419,7 @@ func (k *KumoruClient) EndBytes(callback ...func(response Response, body []byte,
 	// Log details of this request
 	if k.Debug {
 		dump, logErr := httputil.DumpRequest(req, true)
-		if logErr != nil {
-			k.Logger.Println("Error:", err)
-		} else {
-			k.Logger.Printf("HTTP Request: %s", string(dump))
-		}
+		k.check(logErr, dump)
 	}
 
 	// Send request
@@ -445,11 +433,7 @@ func (k *KumoruClient) EndBytes(callback ...func(response Response, body []byte,
 	// Log details of this response
 	if k.Debug {
 		dump, err := httputil.DumpResponse(resp, true)
-		if nil != err {
-			k.Logger.Println("Error:", err)
-		} else {
-			k.Logger.Printf("HTTP Response: %s", string(dump))
-		}
+		k.check(err, dump)
 	}
 
 	body, _ := ioutil.ReadAll(resp.Body)
@@ -463,23 +447,11 @@ func (k *KumoruClient) EndBytes(callback ...func(response Response, body []byte,
 	return resp, body, nil
 }
 
-func changeMapToURLValues(data map[string]interface{}) url.Values {
-	var newURLValues = url.Values{}
-	for k, v := range data {
-		switch val := v.(type) {
-		case string:
-			newURLValues.Add(k, val)
-		case []string:
-			for _, element := range val {
-				newURLValues.Add(k, element)
-			}
-		// if a number, change to string
-		// json.Number used to protect against a wrong (for GoRequest) default conversion
-		// which always converts number to float64.
-		// This type is caused by using Decoder.UseNumber()
-		case json.Number:
-			newURLValues.Add(k, string(val))
-		}
+func (k *Client) check(e error, dump []byte) {
+	if e != nil {
+		k.Logger.Println("Error:", e)
+	} else {
+		k.Logger.Printf("HTTP Request: %s", string(dump))
 	}
-	return newURLValues
+
 }

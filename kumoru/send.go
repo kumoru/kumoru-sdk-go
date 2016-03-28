@@ -9,7 +9,7 @@ import (
 )
 
 // Send a string or a struct as parameters
-func (k *KumoruClient) Send(content interface{}) *KumoruClient {
+func (k *Client) Send(content interface{}) *Client {
 	switch v := reflect.ValueOf(content); v.Kind() {
 	case reflect.String:
 		k.SendString(v.String())
@@ -20,7 +20,8 @@ func (k *KumoruClient) Send(content interface{}) *KumoruClient {
 	return k
 }
 
-func (k *KumoruClient) SendString(content string) *KumoruClient {
+// SendString sends the information as a raw string
+func (k *Client) SendString(content string) *Client {
 	if !k.BounceToRawString {
 		var val interface{}
 		d := json.NewDecoder(strings.NewReader(content))
@@ -35,7 +36,7 @@ func (k *KumoruClient) SendString(content string) *KumoruClient {
 				k.BounceToRawString = true
 			}
 		} else if formVal, err := url.ParseQuery(content); err == nil {
-			for key, _ := range formVal {
+			for key := range formVal {
 				// make it array if already have key
 				if val, ok := k.Data[key]; ok {
 					var strArray []string
@@ -64,7 +65,7 @@ func (k *KumoruClient) SendString(content string) *KumoruClient {
 }
 
 // SendStruct converts a struct to parameters
-func (k *KumoruClient) SendStruct(content interface{}) *KumoruClient {
+func (k *Client) SendStruct(content interface{}) *Client {
 	if marshalContent, err := json.Marshal(content); err != nil {
 		k.Errors = append(k.Errors, err)
 	} else {
@@ -82,7 +83,8 @@ func (k *KumoruClient) SendStruct(content interface{}) *KumoruClient {
 	return k
 }
 
-func (k *KumoruClient) SendSlice(content []interface{}) *KumoruClient {
+// SendSlice appends an array into k.SliceData
+func (k *Client) SendSlice(content []interface{}) *Client {
 	k.SliceData = append(k.SliceData, content...)
 	return k
 }
