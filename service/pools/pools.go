@@ -1,6 +1,7 @@
 package pools
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -8,60 +9,105 @@ import (
 	"github.com/kumoru/kumoru-sdk-go/kumoru"
 )
 
-// Create a new pool
-func Create(location string, credentials string) (*http.Response, string, []error) {
+type Location struct {
+	CreatedAt  string `json:"created_at"`
+	Identifier string `json:"location"`
+	Provider   string `json:"provider"`
+	PoolId     string `json:"stack_id"`
+	Status     string `json:"status"`
+	UpdatedAt  string `json:"updated_at"`
+	Url        string `json:"url"`
+	Uuid       string `json:"uuid"`
+	Version    string `json:"version"`
+}
+
+// Create is a method on a Location that will create Kumoru resources in the provider region
+func (l *Location) Create() (*Location, *http.Response, []error) {
 	k := kumoru.New()
 
 	k.Post(fmt.Sprintf("%v/v1/pools/", k.EndPoint.Pool))
-	k.Send(fmt.Sprintf("location=%s&credentials=%s", url.QueryEscape(location), url.QueryEscape(credentials)))
+	k.Send(fmt.Sprintf("location=%s", url.QueryEscape(l.Identifier)))
 	k.SignRequest(true)
 
-	return k.End()
+	resp, body, errs := k.End()
+
+	if resp.StatusCode >= 400 {
+		errs = append(errs, fmt.Errorf("%s", resp.Status))
+		return l, resp, errs
+	}
+
+	err := json.Unmarshal([]byte(body), &l)
+
+	if err != nil {
+		errs = append(errs, err)
+		return l, resp, errs
+	}
+
+	return l, resp, nil
 }
 
-// Delete a pool that matches the given UUID
-func Delete(UUID string) (*http.Response, string, []error) {
+//Delete is a method on a Location that will remove Kumoru resources from the provider region
+func (l *Location) Delete(uuid string) (*Location, *http.Response, []error) {
 	k := kumoru.New()
 
-	k.Delete(fmt.Sprintf("%v/v1/pools/%s", k.EndPoint.Pool, UUID))
+	k.Delete(fmt.Sprintf("%v/v1/pools/%s", k.EndPoint.Pool, uuid))
 	k.SignRequest(true)
 
-	return k.End()
+	resp, _, errs := k.End()
+
+	if errs != nil {
+		return l, resp, errs
+	}
+
+	return l, resp, nil
 }
 
-// List all available pools
-func List() (*http.Response, string, []error) {
+//List is a method on a Location that will list all Locations an user has access to
+func (l *Location) List() (*[]Location, *http.Response, []error) {
+	locations := []Location{}
 	k := kumoru.New()
 
 	k.Get(fmt.Sprintf("%v/v1/pools/", k.EndPoint.Pool))
 	k.SignRequest(true)
 
-	return k.End()
-}
+	resp, body, errs := k.End()
 
-// Patch a pool that matches an UUID
-func Patch(UUID, credentials string) (*http.Response, string, []error) {
-	k := kumoru.New()
-
-	k.Patch(fmt.Sprintf("%v/v1/pools/%s", k.EndPoint.Pool, UUID))
-	k.Send(fmt.Sprintf("credentials=%s", url.QueryEscape(credentials)))
-
-	k.SignRequest(true)
-	return k.End()
-}
-
-// Get a pool model that matches the given UUID
-func Show(UUID string, wrappedRequest *http.Request) (*http.Response, string, []error) {
-	k := kumoru.New()
-
-	k.Get(fmt.Sprintf("%v/v1/pools/%s", k.EndPoint.Pool, UUID))
-	if wrappedRequest != nil {
-		k.ProxyRequest(wrappedRequest)
-		if wrappedRequest.Header.Get("X-Kumoru-Context") != "" {
-			k.SetHeader("X-Kumoru-Context", wrappedRequest.Header.Get("X-Kumoru-Context"))
-		}
+	if resp.StatusCode >= 400 {
+		errs = append(errs, fmt.Errorf("%s", resp.Status))
+		return &locations, resp, errs
 	}
+
+	err := json.Unmarshal([]byte(body), &locations)
+
+	if err != nil {
+		errs = append(errs, err)
+		return &locations, resp, errs
+	}
+
+	return &locations, resp, nil
+}
+
+//Show is a method on a Location that will show all the details of a particular Location
+func (l *Location) Show() (*Location, *http.Response, []error) {
+	k := kumoru.New()
+
+	k.Get(fmt.Sprintf("%v/v1/pools/%s", k.EndPoint.Pool, l.Uuid))
 	k.SignRequest(true)
 
-	return k.End()
+	resp, body, errs := k.End()
+
+	if resp.StatusCode >= 400 {
+		errs = append(errs, fmt.Errorf("%s", resp.Status))
+		return l, resp, errs
+	}
+
+	err := json.Unmarshal([]byte(body), l)
+
+	if err != nil {
+		errs = append(errs, err)
+		return l, resp, errs
+	}
+
+	return l, resp, errs
+
 }
