@@ -391,11 +391,11 @@ func (k *Client) EndBytes(callback ...func(response Response, body []byte, errs 
 				signingString += fmt.Sprintf("x-kumoru-context:%v\n", req.Header.Get("x-kumoru-context"))
 			}
 
-			k.Logger.Info("signingString", signingString)
+			k.Logger.Debug("signingString", signingString)
 		}
 
 		u, _ := url.Parse(k.URL)
-		k.Logger.Info("k.Url", k.URL)
+		k.Logger.Debug("k.Url", k.URL)
 		signingString += "x-kumoru-date:" + compliantDate + "\n" + u.Path
 		req.Header.Set("X-Kumoru-Date", compliantDate)
 
