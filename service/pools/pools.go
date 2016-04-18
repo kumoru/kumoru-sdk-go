@@ -10,15 +10,16 @@ import (
 )
 
 type Location struct {
-	CreatedAt  string `json:"created_at"`
-	Identifier string `json:"location"`
-	Provider   string `json:"provider"`
-	PoolId     string `json:"stack_id"`
-	Status     string `json:"status"`
-	UpdatedAt  string `json:"updated_at"`
-	Url        string `json:"url"`
-	Uuid       string `json:"uuid"`
-	Version    string `json:"version"`
+	AggregateResources map[string]float32 `json:"aggregate_resources"`
+	CreatedAt          string             `json:"created_at"`
+	Identifier         string             `json:"location"`
+	Provider           string             `json:"provider"`
+	PoolId             string             `json:"stack_id"`
+	Status             string             `json:"status"`
+	UpdatedAt          string             `json:"updated_at"`
+	Url                string             `json:"url"`
+	Uuid               string             `json:"uuid"`
+	ApiVersion         string             `json:"api_version"`
 }
 
 // Create is a method on a Location that will create Kumoru resources in the provider region
