@@ -2,7 +2,6 @@ package kumoru
 
 import (
 	"bytes"
-	"encoding/json"
 	"net/http"
 	"strings"
 )
@@ -12,15 +11,7 @@ func (k *Client) NewRequest() (*http.Request, error) {
 	switch k.Method {
 	case POST, PUT, PATCH:
 		if k.TargetType == "json" {
-
-			var contentJSON []byte
-
-			if len(k.Data) != 0 {
-				contentJSON, _ = json.Marshal(k.Data)
-			}
-
-			contentReader := bytes.NewReader(contentJSON)
-			req, err := http.NewRequest(k.Method, k.URL, contentReader)
+			req, err := http.NewRequest(k.Method, k.URL, strings.NewReader(k.RawString))
 			req.Header.Set("Content-Type", "application/json")
 			return req, err
 		} else if k.TargetType == "form" {
