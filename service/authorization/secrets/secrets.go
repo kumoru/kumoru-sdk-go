@@ -64,6 +64,40 @@ func (s *Secret) Show(secretUuid *string) (*Secret, *http.Response, []error) {
 	return &secret, resp, errs
 }
 
+//List retreives all secrets a role has access to
+func List() ([]*Secret, *http.Response, []error) {
+	apps := []*Secret{}
+	k := kumoru.New()
+
+	k.Get(fmt.Sprintf("%s/v1/secrets/", k.EndPoint.Authorization))
+	k.SignRequest(true)
+
+	resp, body, errs := k.End()
+
+	if len(errs) > 0 {
+		return nil, resp, errs
+	}
+
+	if resp.StatusCode >= 400 {
+		errs = append(errs, fmt.Errorf("%s", resp.Status))
+	}
+
+	err := json.Unmarshal([]byte(body), &apps)
+
+	if err != nil {
+		errs = append(errs, fmt.Errorf("%s", err))
+	}
+
+	for i := 0; i < len(apps); i++ {
+		fmt.Println(apps[i].CreatedAt)
+		apps[i].CreatedAt = apps[i].CreatedAt + "Z"
+		apps[i].UpdatedAt = apps[i].UpdatedAt + "Z"
+	}
+
+	return apps, resp, nil
+}
+
+//Helpers
 func genParameters(value string) string {
 	var params string
 
