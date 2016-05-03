@@ -10,10 +10,11 @@ import (
 )
 
 type Secret struct {
-	CreatedAt string `"json: created_at"`
-	Value     string `"json: value"`
-	UpdatedAt string `"json: updated_at"`
-	Uuid      string `"json: uuid"`
+	CreatedAt string   `"json: created_at"`
+	Labels    []string `"json: labels,omitempty"`
+	UpdatedAt string   `"json: updated_at"`
+	Uuid      string   `"json: uuid"`
+	Value     string   `"json: value"`
 }
 
 // Create is a Secret method that will create a secret with the specified value
@@ -21,7 +22,7 @@ func (s *Secret) Create() (*Secret, *http.Response, []error) {
 	k := kumoru.New()
 
 	k.Post(fmt.Sprintf("%v/v1/secrets/", k.EndPoint.Authorization))
-	k.Send(genParameters(s.Value))
+	k.Send(genParameters(s.Value, s.Labels))
 	k.SignRequest(true)
 
 	resp, body, errs := k.End()
@@ -88,21 +89,19 @@ func List() ([]*Secret, *http.Response, []error) {
 		errs = append(errs, fmt.Errorf("%s", err))
 	}
 
-	for i := 0; i < len(apps); i++ {
-		fmt.Println(apps[i].CreatedAt)
-		apps[i].CreatedAt = apps[i].CreatedAt + "Z"
-		apps[i].UpdatedAt = apps[i].UpdatedAt + "Z"
-	}
-
 	return apps, resp, nil
 }
 
 //Helpers
-func genParameters(value string) string {
+func genParameters(value string, labels []string) string {
 	var params string
 
 	if value != "" {
 		params += fmt.Sprintf("value=%s&", url.QueryEscape(value))
+	}
+
+	for _, v := range labels {
+		params += fmt.Sprintf("labels=%s&", url.QueryEscape(v))
 	}
 
 	return params
