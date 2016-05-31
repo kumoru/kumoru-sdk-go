@@ -1,0 +1,49 @@
+{
+	"comment": "",
+	"ignore": "",
+	"package": [
+		{
+			"checksumSHA1": "mhiaZdFNe32oOKU3U0PRl11kAWc=",
+			"path": "code.google.com/p/go-uuid/uuid",
+			"revision": "35bc42037350",
+			"revisionTime": "2014-12-02T16:54:02Z"
+		},
+		{
+			"checksumSHA1": "8pqHlKFAfNDTk1WP8jLYbQA8GBY=",
+			"path": "github.com/Sirupsen/logrus",
+			"revision": "4643a7efec9b8fd7548882e7b30095711343100f",
+			"revisionTime": "2015-10-12T21:08:13Z"
+		},
+		{
+			"checksumSHA1": "fVgz/pcm/CRl3V1vyyqmj4Hwg+o=",
+			"path": "github.com/fatih/structs",
+			"revision": "73c4e3dc02a78deaba8640d5f3a8c236ec1352bf",
+			"revisionTime": "2016-03-17T09:28:53Z"
+		},
+		{
+			"checksumSHA1": "v/zThPF22nHh2/JyWEjyi1Zba6c=",
+			"path": "github.com/jawher/mow.cli",
+			"revision": "ec353aa1195a385f193bd2e681d26f739b584b6e",
+			"revisionTime": "2015-10-12T20:44:29Z"
+		},
+		{
+			"checksumSHA1": "3frKIgQ5Cg/7DNOcJC9NzTRehno=",
+			"path": "github.com/ryanuber/columnize",
+			"revision": "983d3a5fab1bf04d1b412465d2d9f8430e2e917e",
+			"revisionTime": "2015-09-15T23:29:42Z"
+		},
+		{
+			"checksumSHA1": "PuNlB3GBL80NhPt6ULoM+GFBXaQ=",
+			"path": "golang.org/x/crypto/ssh/terminal",
+			"revision": "3760e016850398b85094c4c99e955b8c3dea5711",
+			"revisionTime": "2015-12-23T21:51:54Z"
+		},
+		{
+			"checksumSHA1": "2WyoHGKQhpQJiZe7eaGHsNupJCc=",
+			"path": "gopkg.in/ini.v1",
+			"revision": "aea5e9fd2e7dc7701717f980b20ccbced24cbb85",
+			"revisionTime": "2015-10-08T13:31:02Z"
+		}
+	],
+	"rootPath": "github.com/kumoru/kumoru-sdk-go"
+}
