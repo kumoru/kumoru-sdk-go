@@ -26,7 +26,7 @@ import (
 
 	"github.com/fatih/structs"
 	"github.com/jawher/mow.cli"
-	"github.com/kumoru/kumoru-cli/utils"
+	"github.com/kumoru/kumoru-sdk-go/client/kumoru/utils"
 	"github.com/kumoru/kumoru-sdk-go/pkg/service/authorization"
 	"github.com/ryanuber/columnize"
 	"golang.org/x/crypto/ssh/terminal"

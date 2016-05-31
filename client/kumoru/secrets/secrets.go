@@ -23,7 +23,7 @@ import (
 
 	"github.com/fatih/structs"
 	"github.com/jawher/mow.cli"
-	"github.com/kumoru/kumoru-cli/utils"
+	"github.com/kumoru/kumoru-sdk-go/client/kumoru/utils"
 	"github.com/kumoru/kumoru-sdk-go/pkg/service/authorization/secrets"
 	"github.com/ryanuber/columnize"
 )
