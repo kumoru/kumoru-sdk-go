@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"code.google.com/p/go-uuid/uuid"
 	"github.com/kumoru/kumoru-sdk-go/pkg/kumoru"
+	"github.com/pborman/uuid"
 )
 
 //Account represents a user and pretinent metadata about that user.
@@ -70,11 +70,7 @@ func (a *Account) ResetPassword() (*Account, *http.Response, []error) {
 	k.Get(fmt.Sprintf("%v/v1/accounts/%v/password/resets/", k.EndPoint.Authorization, a.Email))
 	resp, _, errs := k.End()
 
-	if errs != nil {
-		return a, resp, errs
-	}
-
-	return a, resp, nil
+	return a, resp, errs
 }
 
 //ShowAcct requests account details from Kumoru and marshals the data into the Account type.

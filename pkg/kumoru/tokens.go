@@ -19,7 +19,7 @@ package kumoru
 import (
 	"os"
 
-	"gopkg.in/ini.v1"
+	"github.com/go-ini/ini"
 )
 
 // Ktokens contains public and private tokens
