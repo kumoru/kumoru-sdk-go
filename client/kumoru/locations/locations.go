@@ -18,28 +18,35 @@ package locations
 
 import (
 	"fmt"
-	"strings"
 
 	log "github.com/Sirupsen/logrus"
 
 	"github.com/jawher/mow.cli"
-	"github.com/kumoru/kumoru-sdk-go/pkg/service/pools"
+	"github.com/kumoru/kumoru-sdk-go/pkg/service/location"
 	"github.com/ryanuber/columnize"
 )
 
+//Add a location in a given region for the particular provider
 func Add(cmd *cli.Cmd) {
+	provider := cmd.String(cli.StringArg{
+		Name:      "PROVIDER",
+		Desc:      "Cloud provider(i.e. amazon)",
+		HideValue: true,
+	})
 
 	identifier := cmd.String(cli.StringArg{
-		Name:      "LOCATION",
-		Desc:      "location to be added to your current role(i.e. us-east-1)",
+		Name:      "IDENTIFIER",
+		Desc:      "Cloud provider specific region/zone/etc identifier (i.e. us-east-1)",
 		HideValue: true,
 	})
 
 	cmd.Action = func() {
-		l := pools.Location{}
-		l.Identifier = *identifier
+		l := location.Location{
+			Provider: *provider,
+			Region:   *identifier,
+		}
 
-		location, resp, errs := l.Create()
+		newLocation, resp, errs := l.Create()
 
 		if len(errs) > 0 {
 			log.Fatalf("Could not add new location: %s", errs)
@@ -49,33 +56,46 @@ func Add(cmd *cli.Cmd) {
 			log.Fatalf("Cloud not add new location: %s", resp.Status)
 		}
 
-		PrintLocationBrief([]pools.Location{*location}, false)
+		PrintLocationBrief([]location.Location{*newLocation})
 	}
 }
 
-func Archive(cmd *cli.Cmd) {
-	uuid := cmd.String(cli.StringArg{
-		Name:      "UUID",
-		Desc:      "Region UUID",
+//Delete a location in a given region for the particular provider
+func Delete(cmd *cli.Cmd) {
+	provider := cmd.String(cli.StringArg{
+		Name:      "PROVIDER",
+		Desc:      "Cloud provider(i.e. amazon)",
+		HideValue: true,
+	})
+
+	identifier := cmd.String(cli.StringArg{
+		Name:      "IDENTIFIER",
+		Desc:      "Cloud provider specific region/zone/etc identifier (i.e. us-east-1)",
 		HideValue: true,
 	})
 
 	cmd.Action = func() {
-		var l *pools.Location
-		l, resp, errs := l.Delete(*uuid)
+
+		l := location.Location{
+			Provider: *provider,
+			Region:   *identifier,
+		}
+
+		//TODO determine if there are any applications in the location and prompt user to remove them
+		_, resp, errs := l.Delete()
 
 		if len(errs) > 0 {
-			log.Fatalf("Could not archive location: %s", errs)
+			log.Fatalf("Could not delete location: %s", errs)
 		}
 
-		if resp.StatusCode != 202 {
-			log.Fatalf("Could not archive location: %s", resp.Status)
+		if resp.StatusCode != 201 {
+			log.Fatalf("Cloud not delete location: %s", resp.Status)
 		}
-
-		fmt.Sprintf("Location %s accepted for archival\n", *uuid)
+		fmt.Printf("Deleting location %s-%s", *provider, *identifier)
 	}
 }
 
+/*
 func List(cmd *cli.Cmd) {
 	all := cmd.BoolOpt("a all", false, "List all locations, including archived")
 
@@ -93,19 +113,16 @@ func List(cmd *cli.Cmd) {
 
 		PrintLocationBrief(*locations, *all)
 	}
-}
+}*/
 
-func PrintLocationBrief(l []pools.Location, showAll bool) {
+//PrintLocationBrief outputs a listing of locations with minimal details
+func PrintLocationBrief(l []location.Location) {
 	var output []string
 
-	output = append(output, fmt.Sprintf("Location | Provider | UUID | Status | Aggregrate Resources"))
+	output = append(output, fmt.Sprintf("Provider | Region"))
 
 	for i := 0; i < len(l); i++ {
-		if showAll {
-			output = append(output, fmt.Sprintf("%s | %s | %s| %s| %v vCPU, %vGB RAM", l[i].Identifier, l[i].Provider, l[i].Uuid, l[i].Status, l[i].AggregateResources["cpu"], l[i].AggregateResources["ram"]))
-		} else if strings.ToLower(string(l[i].Status)) != "archived" {
-			output = append(output, fmt.Sprintf("%s | %s | %s| %s| %v vCPU, %vGB RAM", l[i].Identifier, l[i].Provider, l[i].Uuid, l[i].Status, l[i].AggregateResources["cpu"], l[i].AggregateResources["ram"]))
-		}
+		output = append(output, fmt.Sprintf("%s | %s", l[i].Provider, l[i].Region))
 	}
 
 	fmt.Println(columnize.SimpleFormat(output))

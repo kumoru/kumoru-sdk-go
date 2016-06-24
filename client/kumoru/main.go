@@ -75,8 +75,8 @@ func main() {
 
 	app.Command("locations", "Location actions", func(location *cli.Cmd) {
 		location.Command("add", "Add location to current role", locations.Add)
-		location.Command("archive", "Archive specific location (WARNING: destructive)", locations.Archive)
-		location.Command("list", "List all locations", locations.List)
+		//		location.Command("archive", "Archive specific location (WARNING: destructive)", locations.Archive)
+		//		location.Command("list", "List all locations", locations.List)
 	})
 
 	app.Command("secrets", "Secrets actions", func(sec *cli.Cmd) {

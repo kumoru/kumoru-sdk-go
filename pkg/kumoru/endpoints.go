@@ -26,7 +26,7 @@ import (
 type Endpoints struct {
 	Application   string
 	Authorization string
-	Pool          string
+	Location      string
 }
 
 // LoadEndpoints returns and Endpoints struct by reading them from a file or from defaults
@@ -43,16 +43,16 @@ func LoadEndpoints(filename string, section string) Endpoints {
 		authManagerURL = os.Getenv("AUTHORIZATION_MANAGER_URL")
 	}
 
-	poolManagerURL := "https://pool.kumoru.io"
-	if os.Getenv("POOL_MANAGER_URL") != "" {
-		poolManagerURL = os.Getenv("POOL_MANAGER_URL")
+	locationManagerURL := "https://locations.kumoru.io"
+	if os.Getenv("LOCATION_MANAGER_URL") != "" {
+		locationManagerURL = os.Getenv("LOCATION_MANAGER_URL")
 	}
 
 	if err != nil {
 		return Endpoints{
 			Application:   appManagerURL,
 			Authorization: authManagerURL,
-			Pool:          poolManagerURL,
+			Location:      locationManagerURL,
 		}
 	}
 
@@ -61,13 +61,13 @@ func LoadEndpoints(filename string, section string) Endpoints {
 		return Endpoints{
 			Application:   appManagerURL,
 			Authorization: authManagerURL,
-			Pool:          poolManagerURL,
+			Location:      locationManagerURL,
 		}
 	}
 
 	return Endpoints{
 		Application:   iniEndpoints.Key("kumoru_application_api").String(),
 		Authorization: iniEndpoints.Key("kumoru_authorization_api").String(),
-		Pool:          iniEndpoints.Key("kumoru_pool_api").String(),
+		Location:      iniEndpoints.Key("kumoru_location_api").String(),
 	}
 }
