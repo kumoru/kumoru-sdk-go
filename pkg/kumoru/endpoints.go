@@ -68,6 +68,6 @@ func LoadEndpoints(filename string, section string) Endpoints {
 	return Endpoints{
 		Application:   iniEndpoints.Key("kumoru_application_api").String(),
 		Authorization: iniEndpoints.Key("kumoru_authorization_api").String(),
-		Location:      iniEndpoints.Key("kumoru_location_api").String(),
+		Location:      iniEndpoints.Key("kumoru_locations_api").String(),
 	}
 }

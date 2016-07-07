@@ -390,7 +390,8 @@ func (k *Client) EndBytes(callback ...func(response Response, body []byte, errs 
 			k.Logger.Fatal(err)
 		}
 
-		if len(d) != 0 {
+		switch k.Method {
+		case POST, PUT, PATCH:
 			md5Sum := md5.Sum(d)
 			req.Header.Set("Content-MD5", fmt.Sprintf("%x", string(md5Sum[:16])))
 
@@ -414,6 +415,7 @@ func (k *Client) EndBytes(callback ...func(response Response, body []byte, errs 
 		k.Logger.Debug("k.Url", k.URL)
 		signingString += "x-kumoru-date:" + compliantDate + "\n" + u.Path
 		req.Header.Set("X-Kumoru-Date", compliantDate)
+		log.Debug("Signing String: ", signingString)
 
 		h := hmac.New(sha256.New, []byte(k.Tokens.Private))
 		h.Write([]byte(signingString))

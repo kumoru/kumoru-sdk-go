@@ -17,6 +17,7 @@ limitations under the License.
 package locations
 
 import (
+	"encoding/json"
 	"fmt"
 
 	log "github.com/Sirupsen/logrus"
@@ -46,17 +47,19 @@ func Add(cmd *cli.Cmd) {
 			Region:   *identifier,
 		}
 
-		newLocation, resp, errs := l.Create()
+		body, errs := l.Create()
 
 		if len(errs) > 0 {
 			log.Fatalf("Could not add new location: %s", errs)
 		}
 
-		if resp.StatusCode != 201 {
-			log.Fatalf("Cloud not add new location: %s", resp.Status)
+		err := json.Unmarshal([]byte(body), &l)
+
+		if err != nil {
+			log.Fatal(err)
 		}
 
-		PrintLocationBrief([]location.Location{*newLocation})
+		PrintLocationBrief([]location.Location{l})
 	}
 }
 
@@ -75,45 +78,58 @@ func Delete(cmd *cli.Cmd) {
 	})
 
 	cmd.Action = func() {
-
 		l := location.Location{
 			Provider: *provider,
 			Region:   *identifier,
 		}
 
 		//TODO determine if there are any applications in the location and prompt user to remove them
-		_, resp, errs := l.Delete()
+		errs := l.Delete()
 
 		if len(errs) > 0 {
 			log.Fatalf("Could not delete location: %s", errs)
 		}
 
-		if resp.StatusCode != 201 {
-			log.Fatalf("Cloud not delete location: %s", resp.Status)
-		}
 		fmt.Printf("Deleting location %s-%s", *provider, *identifier)
 	}
 }
 
-/*
+//List all available Locations and optionally apply a filter
 func List(cmd *cli.Cmd) {
-	all := cmd.BoolOpt("a all", false, "List all locations, including archived")
+	provider := cmd.String(cli.StringOpt{
+		Name:      "provider",
+		Desc:      "Cloud provider(i.e. amazon)",
+		HideValue: true,
+	})
+
+	identifier := cmd.String(cli.StringOpt{
+		Name:      "identifier",
+		Desc:      "Cloud provider specific region/zone/etc identifier (i.e. us-east-1)",
+		HideValue: true,
+	})
 
 	cmd.Action = func() {
-		l := pools.Location{}
-		locations, resp, errs := l.List()
+		l := location.Location{
+			Provider: *provider,
+			Region:   *identifier,
+		}
+
+		body, errs := l.Find()
 
 		if len(errs) > 0 {
 			log.Fatalf("Could not retrieve locations: %s", errs[0])
 		}
 
-		if resp.StatusCode != 200 {
-			log.Fatalf("Cloud not retrieve locations: %s", resp.Status)
+		locations := &[]location.Location{}
+		err := json.Unmarshal([]byte(body), locations)
+
+		if err != nil {
+			log.Fatal(err)
 		}
 
-		PrintLocationBrief(*locations, *all)
+		PrintLocationBrief(*locations)
 	}
-}*/
+}
 
 //PrintLocationBrief outputs a listing of locations with minimal details
 func PrintLocationBrief(l []location.Location) {

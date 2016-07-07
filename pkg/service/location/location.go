@@ -17,9 +17,7 @@ limitations under the License.
 package location
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/http"
 
 	"github.com/kumoru/kumoru-sdk-go/pkg/kumoru"
 )
@@ -31,8 +29,8 @@ type Location struct {
 	Region           string `json:"region"`
 }
 
-//Create is a method which will request a location be created
-func (l *Location) Create() (*Location, *http.Response, []error) {
+//Create is a method which will request a Location be created
+func (l *Location) Create() (string, []error) {
 	k := kumoru.New()
 
 	k.Put(fmt.Sprintf("%s/v1/locations/%s/%s", k.EndPoint.Location, l.Provider, l.Region))
@@ -40,22 +38,15 @@ func (l *Location) Create() (*Location, *http.Response, []error) {
 
 	resp, body, errs := k.End()
 
-	if resp.StatusCode >= 400 {
+	if resp.StatusCode != 201 {
 		errs = append(errs, fmt.Errorf("%s", resp.Status))
 	}
 
-	err := json.Unmarshal([]byte(body), &l)
-
-	if err != nil {
-		errs = append(errs, err)
-		return l, resp, errs
-	}
-
-	return l, resp, nil
+	return string(body), errs
 }
 
 //Delete will request that a particular Location be removed
-func (l *Location) Delete() (*Location, *http.Response, []error) {
+func (l *Location) Delete() []error {
 	k := kumoru.New()
 
 	k.Delete(fmt.Sprintf("%s/v1/locations/%s/%s", k.EndPoint.Location, l.Provider, l.Region))
@@ -63,9 +54,40 @@ func (l *Location) Delete() (*Location, *http.Response, []error) {
 
 	resp, _, errs := k.End()
 
-	if resp.StatusCode >= 400 {
+	if resp.StatusCode != 204 {
 		errs = append(errs, fmt.Errorf("s", resp.Status))
 	}
 
-	return l, resp, nil
+	return errs
+}
+
+//Find is a method which will search for Locations based on inputs
+func (l *Location) Find() (string, []error) {
+	k := kumoru.New()
+
+	k.Get(l.buildFindPath(k.EndPoint.Location))
+	k.SignRequest(true)
+
+	resp, body, errs := k.End()
+
+	if resp.StatusCode != 200 {
+		errs = append(errs, fmt.Errorf("%s", resp.Status))
+	}
+
+	return string(body), errs
+}
+
+//buildFindPath uses elements from a Location to create a path that can be used during a GET on .../locations/...
+func (l *Location) buildFindPath(endpoint string) string {
+	path := fmt.Sprintf("%s/v1/locations/", endpoint)
+
+	if l.Provider != "" {
+		path = fmt.Sprintf("%s%s", path, l.Provider)
+
+		if l.Region != "" {
+			path = fmt.Sprintf("%s/%s", path, l.Region)
+		}
+	}
+
+	return path
 }
