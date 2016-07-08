@@ -58,7 +58,8 @@ func Create(cmd *cli.Cmd) {
 			}
 		}
 
-		token, resp, body, errs := authorization.GetTokens(credentials())
+		username, password := credentials()
+		token, resp, body, errs := authorization.GetTokens(username, password)
 
 		if errs != nil {
 			log.Fatalf("Could not retrieve new tokens: %s", errs)
@@ -69,9 +70,25 @@ func Create(cmd *cli.Cmd) {
 			os.Exit(1)
 		}
 
+		a := authorization.Account{
+			Email: username,
+		}
+
+		account, _, errs := a.Show()
+
+		if errs != nil {
+			log.Fatalf("Could not retrieve new tokens: %s", errs)
+		}
+
 		switch *dontSave {
 		default:
-			errs := kumoru.SaveTokens(directory, filename, "tokens", kumoru.Ktokens{
+			errs := kumoru.SaveRole(directory, filename, "auth", account.RoleUUID)
+
+			if errs != nil {
+				log.Fatalf("Could not save Role to file: %s", errs)
+			}
+
+			errs = kumoru.SaveTokens(directory, filename, "tokens", kumoru.Ktokens{
 				Public:  token,
 				Private: body,
 			})
@@ -82,6 +99,8 @@ func Create(cmd *cli.Cmd) {
 
 			fmt.Printf("\nTokens saved to %s\n", kfile)
 		case true:
+			fmt.Printf("\n[auth]\n")
+			fmt.Printf("active_role=%s\n", account.RoleUUID)
 			fmt.Printf("\n[tokens]\n")
 			fmt.Printf("kumoru_token_public=%s\n", token)
 			fmt.Printf("kumoru_token_private=%s\n", body)

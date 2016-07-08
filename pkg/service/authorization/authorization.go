@@ -31,6 +31,7 @@ type Account struct {
 	CreatedAt string `json:"created_at"`
 	Email     string `json:"email"`
 	GivenName string `json:"given_name"`
+	RoleUUID  string `json:"role_uuid"`
 	Surname   string `json:"surname"`
 	UpdatedAt string `json:"updated_at"`
 }
@@ -73,8 +74,8 @@ func (a *Account) ResetPassword() (*Account, *http.Response, []error) {
 	return a, resp, errs
 }
 
-//ShowAcct requests account details from Kumoru and marshals the data into the Account type.
-func (a *Account) ShowAcct() (*Account, *http.Response, []error) {
+//Show requests account details from Kumoru and marshals the data into the Account type.
+func (a *Account) Show() (*Account, *http.Response, []error) {
 	k := kumoru.New()
 
 	k.Get(fmt.Sprintf("%v/v1/accounts/%v", k.EndPoint.Authorization, a.Email))

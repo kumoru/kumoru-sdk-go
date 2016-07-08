@@ -47,6 +47,22 @@ func LoadTokens(filename string, section string) (Ktokens, error) {
 
 }
 
+// SaveRole writes the active role to a file
+func SaveRole(directory, filename, section string, roleUUID string) error {
+	kfile := directory + filename
+
+	config, err := ini.Load(kfile)
+
+	if err != nil {
+		os.Mkdir(directory, 0755)
+		config = ini.Empty()
+		config.NewSection(section)
+	}
+
+	config.Section(section).NewKey("active_role", roleUUID)
+	return config.SaveTo(kfile)
+}
+
 // SaveTokens writes tokens to a file
 func SaveTokens(directory, filename, section string, tokens Ktokens) error {
 	kfile := directory + filename

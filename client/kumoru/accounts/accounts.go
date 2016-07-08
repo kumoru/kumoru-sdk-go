@@ -62,7 +62,7 @@ func Create(cmd *cli.Cmd) {
 
 		if *password == "" {
 			*password = passwordPrompt()
-			fmt.Println("\n")
+			fmt.Println()
 		}
 
 		l := authorization.Account{
@@ -98,7 +98,7 @@ func Show(cmd *cli.Cmd) {
 			Email: *email,
 		}
 
-		account, resp, errs := a.ShowAcct()
+		account, resp, errs := a.Show()
 
 		if len(errs) > 0 {
 			log.Fatalf("Could not retrieve account: %s", errs[0])
@@ -182,7 +182,7 @@ func passwordPrompt() string {
 	}
 
 	if reflect.DeepEqual(password, passwordConfirm) == false {
-		fmt.Println("\n")
+		fmt.Println()
 		log.Fatal("Passwords do not match")
 	}
 
