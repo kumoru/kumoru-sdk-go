@@ -421,8 +421,13 @@ func (k *Client) EndBytes(callback ...func(response Response, body []byte, errs 
 		u, _ := url.Parse(k.URL)
 		k.Logger.Debug("k.Url", k.URL)
 
-		signingString += "x-kumoru-context:" + k.RoleUUID + "\n"
-		req.Header.Set("X-Kumoru-Context", k.RoleUUID)
+		//There is a chicken and egg problem retrieving account information the first time.
+		//The signing string cannot contain the context (RoleUUID) on the first request for account info.
+		//Since the signing string logic is general purpose, it's easiest to skip this header for GET to .../accounts/...
+		if (strings.Contains(req.URL.Path, "/accounts/") == false) && (k.Method == "GET") {
+			signingString += "x-kumoru-context:" + k.RoleUUID + "\n"
+			req.Header.Set("X-Kumoru-Context", k.RoleUUID)
+		}
 
 		signingString += "x-kumoru-date:" + compliantDate + "\n" + u.Path
 		req.Header.Set("X-Kumoru-Date", compliantDate)
