@@ -28,6 +28,21 @@ type Ktokens struct {
 	Private string
 }
 
+// LoadRole from a file returning the role UUID
+func LoadRole(filename string, section string) (string, error) {
+	config, err := ini.Load(filename)
+	if err != nil {
+		return "", err
+	}
+
+	ini, err := config.GetSection(section)
+	if err != nil {
+		return "", err
+	}
+
+	return ini.Key("active_role").String(), nil
+}
+
 // LoadTokens from a file returning a struct of type Ktokens
 func LoadTokens(filename string, section string) (Ktokens, error) {
 	config, err := ini.Load(filename)

@@ -72,6 +72,7 @@ type (
 		ProxyRequestData  *http.Request
 		QueryData         url.Values
 		RawString         string
+		RoleUUID          string
 		Sign              bool
 		SliceData         []interface{}
 		TargetType        string
@@ -97,7 +98,12 @@ func New() *Client {
 
 	t, err := LoadTokens(config, "tokens")
 	if err != nil {
-		log.Warning("No tokens found...")
+		log.Warning("No tokens found.")
+	}
+
+	roleUUID, err := LoadRole(config, "auth")
+	if err != nil {
+		log.Warning("No active role found. Generate a new token.")
 	}
 
 	envDebug := false
@@ -120,6 +126,7 @@ func New() *Client {
 		ProxyRequestData:  nil,
 		QueryData:         url.Values{},
 		RawString:         "",
+		RoleUUID:          roleUUID,
 		Sign:              false,
 		SliceData:         []interface{}{},
 		TargetType:        "form",
@@ -413,6 +420,10 @@ func (k *Client) EndBytes(callback ...func(response Response, body []byte, errs 
 
 		u, _ := url.Parse(k.URL)
 		k.Logger.Debug("k.Url", k.URL)
+
+		signingString += "x-kumoru-context:" + k.RoleUUID + "\n"
+		req.Header.Set("X-Kumoru-Context", k.RoleUUID)
+
 		signingString += "x-kumoru-date:" + compliantDate + "\n" + u.Path
 		req.Header.Set("X-Kumoru-Date", compliantDate)
 
