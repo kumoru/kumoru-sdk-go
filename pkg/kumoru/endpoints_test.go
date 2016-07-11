@@ -28,7 +28,7 @@ func TestLoadEndpoints(t *testing.T) {
 
 	p := LoadEndpoints("example-cfg.ini", "endpoints")
 
-	assert.Equal(t, "https://locations.kumoru.io", p.Location, "Expect location endpoint to match")
+	assert.Equal(t, "https://location.kumoru.io", p.Location, "Expect location endpoint to match")
 	assert.Equal(t, "https://application.kumoru.io", p.Application, "Expect application endpoint to match")
 	assert.Equal(t, "https://authorization.kumoru.io", p.Authorization, "Expect authorization endpoint to match")
 }
@@ -39,7 +39,7 @@ func TestLoadEndpointsFileNotFound(t *testing.T) {
 
 	assert.NotNil(t, p, "Expecting an error")
 
-	assert.Equal(t, "https://locations.kumoru.io", p.Location, "Expect location endpoint to match")
+	assert.Equal(t, "https://location.kumoru.io", p.Location, "Expect location endpoint to match")
 	assert.Equal(t, "https://application.kumoru.io", p.Application, "Expect application endpoint to match")
 	assert.Equal(t, "https://authorization.kumoru.io", p.Authorization, "Expect authorization endpoint to match")
 }

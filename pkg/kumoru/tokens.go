@@ -40,7 +40,7 @@ func LoadRole(filename string, section string) (string, error) {
 		return "", err
 	}
 
-	return ini.Key("active_role").String(), nil
+	return ini.Key("role_uuid").String(), nil
 }
 
 // LoadTokens from a file returning a struct of type Ktokens
@@ -74,7 +74,7 @@ func SaveRole(directory, filename, section string, roleUUID string) error {
 		config.NewSection(section)
 	}
 
-	config.Section(section).NewKey("active_role", roleUUID)
+	config.Section(section).NewKey("role_uuid", roleUUID)
 	return config.SaveTo(kfile)
 }
 

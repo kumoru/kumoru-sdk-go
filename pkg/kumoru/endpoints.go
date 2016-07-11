@@ -43,7 +43,7 @@ func LoadEndpoints(filename string, section string) Endpoints {
 		authManagerURL = os.Getenv("AUTHORIZATION_MANAGER_URL")
 	}
 
-	locationManagerURL := "https://locations.kumoru.io"
+	locationManagerURL := "https://location.kumoru.io"
 	if os.Getenv("LOCATION_MANAGER_URL") != "" {
 		locationManagerURL = os.Getenv("LOCATION_MANAGER_URL")
 	}
@@ -68,6 +68,6 @@ func LoadEndpoints(filename string, section string) Endpoints {
 	return Endpoints{
 		Application:   iniEndpoints.Key("kumoru_application_api").String(),
 		Authorization: iniEndpoints.Key("kumoru_authorization_api").String(),
-		Location:      iniEndpoints.Key("kumoru_locations_api").String(),
+		Location:      iniEndpoints.Key("kumoru_location_api").String(),
 	}
 }
