@@ -385,58 +385,7 @@ func (k *Client) EndBytes(callback ...func(response Response, body []byte, errs 
 			req.SetBasicAuth(k.BasicAuth.UserName, k.BasicAuth.Password)
 		}
 	} else {
-
-		date := time.Now().UTC()
-		compliantDate := fmt.Sprintf(date.Format(time.RFC822Z))
-
-		signingString := k.Method + "\n"
-
-		d, readErr := ioutil.ReadAll(strings.NewReader(k.RawString))
-
-		if readErr != nil {
-			k.Logger.Fatal(err)
-		}
-
-		switch k.Method {
-		case POST, PUT, PATCH:
-			md5Sum := md5.Sum(d)
-			req.Header.Set("Content-MD5", fmt.Sprintf("%x", string(md5Sum[:16])))
-
-			signingString += fmt.Sprintf("content-md5:%v\n", req.Header.Get("Content-MD5"))
-			signingString += fmt.Sprintf("content-type:%v\n", req.Header.Get("Content-Type"))
-		}
-
-		if k.ProxyRequestData != nil {
-			req.Header.Set("Proxy-Authorization", genProxyRequestHeader(k.ProxyRequestData))
-			signingString += fmt.Sprintf("proxy-authorization:%v\n", req.Header.Get("Proxy-Authorization"))
-
-			if k.ProxyRequestData.Header.Get("X-Kumoru-Context") != "" {
-				req.Header.Set("X-Kumoru-Context", k.ProxyRequestData.Header.Get("X-Kumoru-Context"))
-				signingString += fmt.Sprintf("x-kumoru-context:%v\n", req.Header.Get("x-kumoru-context"))
-			}
-
-			k.Logger.Debug("signingString", signingString)
-		}
-
-		u, _ := url.Parse(k.URL)
-		k.Logger.Debug("k.Url", k.URL)
-
-		//There is a chicken and egg problem retrieving account information the first time.
-		//The signing string cannot contain the context (RoleUUID) on the first request for account info.
-		//Since the signing string logic is general purpose, it's easiest to skip this header for GET to .../accounts/...
-		if (strings.Contains(req.URL.Path, "/accounts/") == false) && (k.Method == "GET") {
-			signingString += "x-kumoru-context:" + k.RoleUUID + "\n"
-			req.Header.Set("X-Kumoru-Context", k.RoleUUID)
-		}
-
-		signingString += "x-kumoru-date:" + compliantDate + "\n" + u.Path
-		req.Header.Set("X-Kumoru-Date", compliantDate)
-
-		h := hmac.New(sha256.New, []byte(k.Tokens.Private))
-		h.Write([]byte(signingString))
-		digest := fmt.Sprintf("%x", h.Sum(nil))
-
-		req.Header.Set("Authorization", base64.StdEncoding.EncodeToString([]byte(k.Tokens.Public+":"+digest)))
+		k.signRequest(req, time.Now())
 	}
 
 	// Set Transport
@@ -487,4 +436,59 @@ func (k *Client) check(e error, dump []byte) {
 		k.Logger.Printf("HTTP Request: %s", string(dump))
 	}
 
+}
+
+//signRequest sets an authorization header with a signed string
+//t should be a time.Time.Now(). The authorization API will reject requests
+//older than 15 minutes
+func (k *Client) signRequest(req *http.Request, t time.Time) {
+	compliantDate := fmt.Sprintf(t.UTC().Format(time.RFC822Z))
+	signingString := k.Method + "\n"
+
+	d, readErr := ioutil.ReadAll(strings.NewReader(k.RawString))
+
+	if readErr != nil {
+		k.Logger.Fatal(readErr)
+	}
+
+	switch k.Method {
+	case POST, PUT, PATCH:
+		md5Sum := md5.Sum(d)
+		req.Header.Set("Content-MD5", fmt.Sprintf("%x", string(md5Sum[:16])))
+
+		signingString += fmt.Sprintf("content-md5:%v\n", req.Header.Get("Content-MD5"))
+		signingString += fmt.Sprintf("content-type:%v\n", req.Header.Get("Content-Type"))
+	}
+
+	if k.ProxyRequestData != nil {
+		req.Header.Set("Proxy-Authorization", genProxyRequestHeader(k.ProxyRequestData))
+		signingString += fmt.Sprintf("proxy-authorization:%v\n", req.Header.Get("Proxy-Authorization"))
+
+		if k.ProxyRequestData.Header.Get("X-Kumoru-Context") != "" {
+			req.Header.Set("X-Kumoru-Context", k.ProxyRequestData.Header.Get("X-Kumoru-Context"))
+			signingString += fmt.Sprintf("x-kumoru-context:%v\n", req.Header.Get("x-kumoru-context"))
+		}
+
+		k.Logger.Debug("signingString", signingString)
+	}
+
+	u, _ := url.Parse(k.URL)
+	k.Logger.Debug("k.Url", k.URL)
+
+	//There is a chicken and egg problem retrieving account information the first time.
+	//The signing string cannot contain the context (RoleUUID) on the first request for account info.
+	//Since the signing string logic is general purpose, it's easiest to skip this header for GET to .../accounts/...
+	if (strings.Contains(req.URL.Path, "/accounts/") != true) && (k.Method != "GET") {
+		signingString += "x-kumoru-context:" + k.RoleUUID + "\n"
+		req.Header.Set("X-Kumoru-Context", k.RoleUUID)
+	}
+
+	signingString += "x-kumoru-date:" + compliantDate + "\n" + u.Path
+	req.Header.Set("X-Kumoru-Date", compliantDate)
+
+	h := hmac.New(sha256.New, []byte(k.Tokens.Private))
+	h.Write([]byte(signingString))
+	digest := fmt.Sprintf("%x", h.Sum(nil))
+
+	req.Header.Set("Authorization", base64.StdEncoding.EncodeToString([]byte(k.Tokens.Public+":"+digest)))
 }

@@ -20,8 +20,12 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
+	"reflect"
 	"testing"
+	"time"
+	//log "github.com/Sirupsen/logrus"
 )
 
 // testing for Get method
@@ -198,4 +202,78 @@ func TestKumoruPut(t *testing.T) {
 	k.End()
 
 	os.Clearenv()
+}
+
+//Testing signing string logic
+func TestSignRequest(t *testing.T) {
+	cases := []struct {
+		request     http.Request
+		time        string
+		expected    string
+		expectedErr error
+	}{
+		{
+			request: http.Request{
+				URL: &url.URL{
+					Host: "example.com",
+				},
+				Header: map[string][]string{},
+
+				Method: "GET",
+			},
+			time:        "2016-07-11 14:42:53.731355805 -0500 CDT",
+			expected:    "OmViYTU1YTk4Yzc3MWIyZmZiNmYwNzk3YzBmYmZkN2FjM2FlNWY4NDAzOTViOTgzMzk0MzliMzkyOGYwZWQwMTk=",
+			expectedErr: nil,
+		}, {
+			request: http.Request{
+				URL: &url.URL{
+					Host: "example.com",
+				},
+				Header: map[string][]string{},
+				Method: "POST",
+			},
+			time:        "2016-07-11 14:42:53.731355805 -0500 CDT",
+			expected:    "OmM1NTQ1YzYzZGNiYThjMGU2YTcwMmEyMWUwYTI4OTAyODA5ZTYxNmNjNmJmYTJhZmEyNjMyZDZkYjI3MzNlNmU=",
+			expectedErr: nil,
+		}, {
+			request: http.Request{
+				URL: &url.URL{
+					Host: "example.com",
+					Path: "/v1/accounts/foo@example.com",
+				},
+				Header: map[string][]string{},
+				Method: "GET",
+			},
+			time:        "2016-07-11 14:42:53.731355805 -0500 CDT",
+			expected:    "OmViYTU1YTk4Yzc3MWIyZmZiNmYwNzk3YzBmYmZkN2FjM2FlNWY4NDAzOTViOTgzMzk0MzliMzkyOGYwZWQwMTk=",
+			expectedErr: nil,
+		}, {
+			request: http.Request{
+				URL: &url.URL{
+					Host: "example.com",
+					Path: "/v1/accounts/foo@example.com",
+				},
+				Header: map[string][]string{},
+				Method: "PUT",
+			},
+			time:        "2016-07-11 14:42:53.731355805 -0500 CDT",
+			expected:    "OmMzYmI4YzFlZTNkNzhkMjI0YzdlYWMyZWQ0MWNjYjc5MDczMmMzYmI0MTZjNjkyYWJiMTE1MzcyZDViMWE1MzQ=",
+			expectedErr: nil,
+		},
+	}
+
+	for _, c := range cases {
+		k := New()
+		k.URL = c.request.URL.Host
+		k.Method = c.request.Method
+		k.RoleUUID = ""
+
+		myTime, _ := time.Parse(time.RFC3339, c.time)
+		k.signRequest(&c.request, myTime)
+
+		header := c.request.Header.Get("Authorization")
+		if !reflect.DeepEqual(header, c.expected) {
+			t.Errorf("header == %v, expected %v", header, c.expected)
+		}
+	}
 }
