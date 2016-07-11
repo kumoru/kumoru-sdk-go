@@ -24,23 +24,19 @@ import "github.com/kumoru/kumoru-sdk-go/pkg/service/application/application.go
 
 ### The CLI
 
-* You can download the latest release from [Releases](https://github.com/kumoru/kumoru-sdk-go/releases).
-* See [README.md](client/kumoru/README.md) for specific instructions on bulding the CLI locally.
+You can download the latest release from [Releases](https://github.com/kumoru/kumoru-sdk-go/releases).
 
-### Building locally
-
-If you prefer to get the latest code and build it your self, you'll need to:
+or if you prefer to get the latest code and build it yourself, you'll need to:
 
 1. Clone this repository
 2. Run `make install-cli` to build it for your local system. This will place the binary in your `${GOPATH}/bin` directory.
-
 
 ### Testing
 
 The SDK and CLI can be tested independently via make:
 
 ```bash
-make test-sdki
+make test-sdk
 ```
 
 ```bash
