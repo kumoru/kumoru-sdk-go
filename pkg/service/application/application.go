@@ -35,7 +35,7 @@ type Application struct {
 	Environment        map[string]string      `json:"environment,omitempty"`
 	Hash               string                 `json:"hash,omitempty"`
 	ImageURL           string                 `json:"image_url"`
-	Location           map[string]string      `json:"location"`
+	Location           Location               `json:"location,omitempty"`
 	Metadata           map[string]interface{} `json:"metadata,omitempty"`
 	Name               string                 `json:"name"`
 	Ports              []string               `json:"ports,omitempty"`
@@ -47,6 +47,11 @@ type Application struct {
 	UUID               string                 `json:"uuid,omitempty"`
 	ApiVersion         string                 `json:"api_version,omitempty"`
 	Certificates       Certificates           `json:"certificates,omitempty"`
+}
+
+type Location struct {
+	Provider string `json:"provider,omitempty"`
+	Region   string `json:"region,omitempty"`
 }
 
 //Certificates type which represents the SSL certificate to be used for an Application.

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"os"
 	"strings"
 	"text/tabwriter"
 )
@@ -23,6 +22,8 @@ type Cmd struct {
 	After func()
 	// The command options and arguments
 	Spec string
+	// The command long description to be shown when help is requested
+	LongDesc string
 	// The command error handling strategy
 	ErrorHandling flag.ErrorHandling
 
@@ -231,30 +232,45 @@ In most cases the library users won't need to call this method, unless
 a more complex validation is needed
 */
 func (c *Cmd) PrintHelp() {
-	out := os.Stderr
+	c.printHelp(false)
+}
 
+/*
+PrintHelp prints the command's help message using the command long description if specified.
+In most cases the library users won't need to call this method, unless
+a more complex validation is needed
+*/
+func (c *Cmd) PrintLongHelp() {
+	c.printHelp(true)
+}
+
+func (c *Cmd) printHelp(longDesc bool) {
 	full := append(c.parents, c.name)
 	path := strings.Join(full, " ")
-	fmt.Fprintf(out, "\nUsage: %s", path)
+	fmt.Fprintf(stdErr, "\nUsage: %s", path)
 
 	spec := strings.TrimSpace(c.Spec)
 	if len(spec) > 0 {
-		fmt.Fprintf(out, " %s", spec)
+		fmt.Fprintf(stdErr, " %s", spec)
 	}
 
 	if len(c.commands) > 0 {
-		fmt.Fprint(out, " COMMAND [arg...]")
+		fmt.Fprint(stdErr, " COMMAND [arg...]")
 	}
-	fmt.Fprint(out, "\n\n")
+	fmt.Fprint(stdErr, "\n\n")
 
-	if len(c.desc) > 0 {
-		fmt.Fprintf(out, "%s\n", c.desc)
+	desc := c.desc
+	if longDesc && len(c.LongDesc) > 0 {
+		desc = c.LongDesc
+	}
+	if len(desc) > 0 {
+		fmt.Fprintf(stdErr, "%s\n", desc)
 	}
 
-	w := tabwriter.NewWriter(out, 15, 1, 3, ' ', 0)
+	w := tabwriter.NewWriter(stdErr, 15, 1, 3, ' ', 0)
 
 	if len(c.args) > 0 {
-		fmt.Fprintf(out, "\nArguments:\n")
+		fmt.Fprintf(stdErr, "\nArguments:\n")
 
 		for _, arg := range c.args {
 			desc := c.formatDescription(arg.desc, arg.envVar)
@@ -266,7 +282,7 @@ func (c *Cmd) PrintHelp() {
 	}
 
 	if len(c.options) > 0 {
-		fmt.Fprintf(out, "\nOptions:\n")
+		fmt.Fprintf(stdErr, "\nOptions:\n")
 
 		for _, opt := range c.options {
 			desc := c.formatDescription(opt.desc, opt.envVar)
@@ -277,7 +293,7 @@ func (c *Cmd) PrintHelp() {
 	}
 
 	if len(c.commands) > 0 {
-		fmt.Fprintf(out, "\nCommands:\n")
+		fmt.Fprintf(stdErr, "\nCommands:\n")
 
 		for _, c := range c.commands {
 			fmt.Fprintf(w, "  %s\t%s\n", c.name, c.desc)
@@ -286,28 +302,22 @@ func (c *Cmd) PrintHelp() {
 	}
 
 	if len(c.commands) > 0 {
-		fmt.Fprintf(out, "\nRun '%s COMMAND --help' for more information on a command.\n", path)
+		fmt.Fprintf(stdErr, "\nRun '%s COMMAND --help' for more information on a command.\n", path)
 	}
 }
 
 func (c *Cmd) formatArgValue(arg *arg) string {
-	var value string
 	if arg.hideValue {
-		value = " "
-	} else {
-		value = fmt.Sprintf("=%#v", arg.get())
+		return " "
 	}
-	return value
+	return "=" + arg.helpFormatter(arg.get())
 }
 
 func (c *Cmd) formatOptValue(opt *opt) string {
-	var value string
 	if opt.hideValue {
-		value = " "
-	} else {
-		value = fmt.Sprintf("=%#v", opt.get())
+		return " "
 	}
-	return value
+	return "=" + opt.helpFormatter(opt.get())
 }
 
 func (c *Cmd) formatDescription(desc, envVar string) string {
@@ -327,7 +337,7 @@ func (c *Cmd) formatDescription(desc, envVar string) string {
 
 func (c *Cmd) parse(args []string, entry, inFlow, outFlow *step) error {
 	if c.helpRequested(args) {
-		c.PrintHelp()
+		c.PrintLongHelp()
 		c.onError(nil)
 		return nil
 	}
@@ -335,7 +345,7 @@ func (c *Cmd) parse(args []string, entry, inFlow, outFlow *step) error {
 	nargsLen := c.getOptsAndArgs(args)
 
 	if err := c.fsm.parse(args[:nargsLen]); err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
+		fmt.Fprintf(stdErr, "Error: %s\n", err.Error())
 		c.PrintHelp()
 		c.onError(err)
 		return err
@@ -387,10 +397,10 @@ func (c *Cmd) parse(args []string, entry, inFlow, outFlow *step) error {
 	switch {
 	case strings.HasPrefix(arg, "-"):
 		err = fmt.Errorf("Error: illegal option %s", arg)
-		fmt.Fprintln(os.Stderr, err.Error())
+		fmt.Fprintln(stdErr, err.Error())
 	default:
 		err = fmt.Errorf("Error: illegal input %s", arg)
-		fmt.Fprintln(os.Stderr, err.Error())
+		fmt.Fprintln(stdErr, err.Error())
 	}
 	c.PrintHelp()
 	c.onError(err)

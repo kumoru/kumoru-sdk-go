@@ -63,9 +63,15 @@ func Archive(cmd *cli.Cmd) {
 
 //Create an Application.
 func Create(cmd *cli.Cmd) {
-	locationUuid := cmd.String(cli.StringArg{
-		Name:      "LOCATION_UUID",
-		Desc:      "UUID of location to create application in",
+	provider := cmd.String(cli.StringArg{
+		Name:      "PROVIDER",
+		Desc:      "cloud provider to be use",
+		HideValue: true,
+	})
+
+	region := cmd.String(cli.StringArg{
+		Name:      "REGION",
+		Desc:      "geographical region to deploy the application",
 		HideValue: true,
 	})
 
@@ -141,19 +147,22 @@ func Create(cmd *cli.Cmd) {
 		HideValue: true,
 	})
 
+	location := application.Location{
+		Provider: *provider,
+		Region:   *region,
+	}
+
 	cmd.Action = func() {
 		app := application.Application{
 			Certificates: readCertificates(certificate, privateKey, certificateChain),
 			Environment:  transformEnvironment(envFile, enVars),
 			ImageURL:     *image,
-			Location: map[string]string{
-				"uuid": *locationUuid,
-			},
-			Metadata: metaData(*meta, *labels),
-			Name:     *name,
-			Ports:    *ports,
-			Rules:    transformRules(rules),
-			SSLPorts: *sslPorts,
+			Location:     location,
+			Metadata:     metaData(*meta, *labels),
+			Name:         *name,
+			Ports:        *ports,
+			Rules:        transformRules(rules),
+			SSLPorts:     *sslPorts,
 		}
 
 		application, resp, errs := app.Create()
@@ -473,9 +482,9 @@ func printAppBrief(a []application.Application, showAll bool) {
 	for i := 0; i < len(a); i++ {
 
 		if showAll {
-			output = append(output, fmt.Sprintf("%s | %s | %s | %s | %s | %s | %s", a[i].Name, a[i].UUID, a[i].Status, a[i].Location["identifier"], fmtPorts(a[i].Ports), fmtPorts(a[i].SSLPorts), fmtRules(a[i].Rules)))
+			output = append(output, fmt.Sprintf("%s | %s | %s | %s | %s | %s | %s", a[i].Name, a[i].UUID, a[i].Status, a[i].Location, fmtPorts(a[i].Ports), fmtPorts(a[i].SSLPorts), fmtRules(a[i].Rules)))
 		} else if strings.ToLower(string(a[i].Status)) != "archived" {
-			output = append(output, fmt.Sprintf("%s | %s | %s | %s | %s | %s | %s", a[i].Name, a[i].UUID, a[i].Status, a[i].Location["identifier"], fmtPorts(a[i].Ports), fmtPorts(a[i].SSLPorts), fmtRules(a[i].Rules)))
+			output = append(output, fmt.Sprintf("%s | %s | %s | %s | %s | %s | %s", a[i].Name, a[i].UUID, a[i].Status, a[i].Location, fmtPorts(a[i].Ports), fmtPorts(a[i].SSLPorts), fmtRules(a[i].Rules)))
 		}
 	}
 
@@ -522,7 +531,7 @@ func printAppDetail(a *application.Application) {
 				outputEnv = append(outputEnv, fmt.Sprintf("%s=%s", k, v))
 			}
 		} else if f.Name() == "Location" {
-			output = append(output, fmt.Sprintf("%s: |Identifier: %s\t UUID: %s\n", f.Name(), a.Location["identifier"], a.Location["uuid"]))
+			output = append(output, fmt.Sprintf("%s: |Identifier: %s\t UUID: %s\n", f.Name(), a.Location.Provider, a.Location.Region))
 		} else if f.Name() == "Metadata" {
 			mdata, _ := json.Marshal(a.Metadata)
 			output = append(output, fmt.Sprintf("%s: |%s\n", f.Name(), mdata))
