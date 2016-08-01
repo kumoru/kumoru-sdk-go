@@ -53,7 +53,8 @@ clean:
 test-cli:
 	@rm -f client/coverage/coverage.txt
 	@rm -f client/coverage/coverage.tmp
-	echo 'mode: atomic' > client/coverage/coverage.txt && go list ./client/... | xargs -n1 -I{} sh -c 'go test -covermode=atomic -coverprofile=./client/coverage/coverage.tmp {} && tail -n +2 ./client/coverage/coverage.tmp >> ./client/coverage/coverage.txt'
+	echo 'mode: atomic' > client/coverage/coverage.txt
+	go list ./client/... | xargs -n1 -I{} sh -c 'go test -covermode=atomic -coverprofile=./client/coverage/coverage.tmp {} && tail -n +2 ./client/coverage/coverage.tmp >> ./client/coverage/coverage.txt'
 
 .PHONY: cli-coverage
 cli-coverage:

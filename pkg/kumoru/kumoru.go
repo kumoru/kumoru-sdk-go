@@ -478,7 +478,9 @@ func (k *Client) signRequest(req *http.Request, t time.Time) {
 	//There is a chicken and egg problem retrieving account information the first time.
 	//The signing string cannot contain the context (RoleUUID) on the first request for account info.
 	//Since the signing string logic is general purpose, it's easiest to skip this header for GET to .../accounts/...
-	if (strings.Contains(req.URL.Path, "/accounts/") != true) && (k.Method != "GET") {
+	if strings.Contains(req.URL.Path, "/accounts/") == true && k.Method == "GET" {
+		//pass
+	} else {
 		signingString += "x-kumoru-context:" + k.RoleUUID + "\n"
 		req.Header.Set("X-Kumoru-Context", k.RoleUUID)
 	}
