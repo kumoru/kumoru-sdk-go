@@ -222,7 +222,7 @@ func TestSignRequest(t *testing.T) {
 				Method: "GET",
 			},
 			time:        "2016-07-11 14:42:53.731355805 -0500 CDT",
-			expected:    "OmViYTU1YTk4Yzc3MWIyZmZiNmYwNzk3YzBmYmZkN2FjM2FlNWY4NDAzOTViOTgzMzk0MzliMzkyOGYwZWQwMTk=",
+			expected:    "OmQ2ZTE4M2Q0NWRkOTUxNzA3NzU2YWQ4ZWRlZjVlMGIwODA5NDQzYzNjNjAwNmJhMjc0ZDE0N2ZhMTllMzkxODI=",
 			expectedErr: nil,
 		}, {
 			request: http.Request{
@@ -257,7 +257,7 @@ func TestSignRequest(t *testing.T) {
 				Method: "PUT",
 			},
 			time:        "2016-07-11 14:42:53.731355805 -0500 CDT",
-			expected:    "OmMzYmI4YzFlZTNkNzhkMjI0YzdlYWMyZWQ0MWNjYjc5MDczMmMzYmI0MTZjNjkyYWJiMTE1MzcyZDViMWE1MzQ=",
+			expected:    "OmUwOThhMWM5NjIwODQyNDg4Y2QwZjllMTRjZTZlNjhlMWVkMGZjYzg0MjA1NTRiYmFjOWM5YjIwOTk5NmE5MjE=",
 			expectedErr: nil,
 		},
 	}
