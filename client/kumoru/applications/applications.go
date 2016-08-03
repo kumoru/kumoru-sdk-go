@@ -147,22 +147,20 @@ func Create(cmd *cli.Cmd) {
 		HideValue: true,
 	})
 
-	location := application.Location{
-		Provider: *provider,
-		Region:   *region,
-	}
-
 	cmd.Action = func() {
 		app := application.Application{
 			Certificates: readCertificates(certificate, privateKey, certificateChain),
 			Environment:  transformEnvironment(envFile, enVars),
 			ImageURL:     *image,
-			Location:     location,
-			Metadata:     metaData(*meta, *labels),
-			Name:         *name,
-			Ports:        *ports,
-			Rules:        transformRules(rules),
-			SSLPorts:     *sslPorts,
+			Location: application.Location{
+				Provider: *provider,
+				Region:   *region,
+			},
+			Metadata: metaData(*meta, *labels),
+			Name:     *name,
+			Ports:    *ports,
+			Rules:    transformRules(rules),
+			SSLPorts: *sslPorts,
 		}
 
 		application, resp, errs := app.Create()

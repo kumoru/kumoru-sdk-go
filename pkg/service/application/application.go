@@ -35,7 +35,7 @@ type Application struct {
 	Environment        map[string]string      `json:"environment,omitempty"`
 	Hash               string                 `json:"hash,omitempty"`
 	ImageURL           string                 `json:"image_url"`
-	Location           Location               `json:"location,omitempty"`
+	Location           Location               `json:"location"`
 	Metadata           map[string]interface{} `json:"metadata,omitempty"`
 	Name               string                 `json:"name"`
 	Ports              []string               `json:"ports,omitempty"`
