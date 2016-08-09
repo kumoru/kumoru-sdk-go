@@ -391,6 +391,7 @@ func (k *Client) EndBytes(callback ...func(response Response, body []byte, errs 
 	// Set Transport
 	certPool := *x509.NewCertPool()
 	certPool.AppendCertsFromPEM(RootCAs.AlphaSSLCA)
+	certPool.AppendCertsFromPEM(RootCAs.LetsEncryptCA)
 
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{RootCAs: &certPool},

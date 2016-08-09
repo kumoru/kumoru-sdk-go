@@ -38,6 +38,7 @@ type Application struct {
 	Location           Location               `json:"location"`
 	Metadata           map[string]interface{} `json:"metadata,omitempty"`
 	Name               string                 `json:"name"`
+	OwnerUUID          string                 `json:"owner_uuid,omitempty"`
 	Ports              []string               `json:"ports,omitempty"`
 	Rules              map[string]int         `json:"rules,omitempty"`
 	SSLPorts           []string               `json:"ssl_ports,omitempty"`
