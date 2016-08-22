@@ -23,6 +23,14 @@ import (
 	"github.com/kumoru/kumoru-sdk-go/pkg/kumoru"
 )
 
+//Resource respresents a resource model in authorization-manager API.
+type Resource struct {
+	CreatedAt string `json:"created_at"`
+	Type      string `json:"type"`
+	UpdatedAt string `json:"updated_at"`
+	UUID      string `json:"uuid"`
+}
+
 // Find resources that are accesible to the requester
 func Find(rType, action, UUID string, wrappedRequest *http.Request) (*http.Response, string, []error) {
 	params := "select_by="
