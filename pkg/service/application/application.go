@@ -14,16 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-//Package appllication provides an Application type and pertinent methods for it.
+//Package application provides an Application type and pertinent methods for it.
 package application
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
 
 	"github.com/kumoru/kumoru-sdk-go/pkg/kumoru"
+	"github.com/mattbaird/jsonpatch"
 )
 
 //Application type represents an Application in Kumoru.
@@ -46,10 +46,11 @@ type Application struct {
 	UpdatedAt          string                 `json:"updated_at,omitempty"`
 	URL                string                 `json:"url,omitempty"`
 	UUID               string                 `json:"uuid,omitempty"`
-	ApiVersion         string                 `json:"api_version,omitempty"`
+	APIVersion         string                 `json:"api_version,omitempty"`
 	Certificates       Certificates           `json:"certificates,omitempty"`
 }
 
+//Location holds pertinent information about the Location the application is deployed in.
 type Location struct {
 	Provider string `json:"provider,omitempty"`
 	Region   string `json:"region,omitempty"`
@@ -141,14 +142,56 @@ func (a *Application) Deploy() (*Application, *http.Response, []error) {
 	return a, resp, nil
 }
 
-// Patch is a method on an application which will modify an Application.
-func (a *Application) Patch(certificates, name, image, metaData string, envVars, rules, ports, sslPorts []string) (*http.Response, string, []error) {
+// Patch is a method on an application which will modify an existing Application.
+func (a *Application) Patch(patchedApplication *Application) (*Application, *http.Response, []error) {
+	o, err := json.Marshal(a)
+	if err != nil {
+		return nil, nil, []error{err}
+	}
+
+	p, err := json.Marshal(patchedApplication)
+	if err != nil {
+		return nil, nil, []error{err}
+	}
+
+	patch, err := jsonpatch.CreatePatch([]byte(o), []byte(p))
+	if err != nil {
+		fmt.Printf("Error creating JSON patch:%v", err)
+		return nil, nil, []error{err}
+	}
+
+	patchBytes, err := json.Marshal(patch)
+	if err != nil {
+		return nil, nil, []error{err}
+	}
 	k := kumoru.New()
 
+	k.Logger.Debugf("Patch string: %s", patchBytes)
+
 	k.Patch(fmt.Sprintf("%s/v1/applications/%s", k.EndPoint.Application, a.UUID))
-	k.Send(genParameters(certificates, name, image, metaData, envVars, rules, ports, sslPorts))
+	k.TargetType = "json-patch+json"
+	k.RawString = string(string(patchBytes))
 	k.SignRequest(true)
-	return k.End()
+
+	resp, body, errs := k.End()
+
+	if len(errs) > 0 {
+		return a, resp, errs
+	}
+
+	if resp.StatusCode >= 400 {
+		errs = append(errs, fmt.Errorf("%s", resp.Status))
+	}
+
+	pApp := Application{}
+	err = json.Unmarshal([]byte(body), &pApp)
+
+	if err != nil {
+		errs = append(errs, err)
+		return a, resp, errs
+	}
+
+	return &pApp, resp, nil
 }
 
 //Show is a method on an Application which retrieves a particular Application from Kumoru.
@@ -187,44 +230,4 @@ func List() (*http.Response, string, []error) {
 	k.Get(fmt.Sprintf("%s/v1/applications/", k.EndPoint.Application))
 	k.SignRequest(true)
 	return k.End()
-}
-
-//genParameters decides which query strings to append to the URI.
-//TODO remove once PATCH has a json interface
-func genParameters(certificates, name, image, metaData string, envVars, rules, ports, sslPorts []string) string {
-	var params string
-
-	if certificates != "" {
-		params += fmt.Sprintf("certificates=%s&", url.QueryEscape(certificates))
-	}
-
-	if name != "" {
-		params += fmt.Sprintf("name=%s&", url.QueryEscape(name))
-	}
-
-	if image != "" {
-		params += fmt.Sprintf("image_url=%s&", url.QueryEscape(image))
-	}
-
-	if metaData != "" {
-		params += fmt.Sprintf("metadata=%s&", url.QueryEscape(metaData))
-	}
-
-	for _, envVar := range envVars {
-		params += fmt.Sprintf("environment=%s&", url.QueryEscape(envVar))
-	}
-
-	for _, port := range ports {
-		params += fmt.Sprintf("ports=%s&", url.QueryEscape(port))
-	}
-
-	for _, sslport := range sslPorts {
-		params += fmt.Sprintf("ssl_ports=%s&", url.QueryEscape(sslport))
-	}
-
-	for _, rule := range rules {
-		params += fmt.Sprintf("rules=%s&", url.QueryEscape(rule))
-	}
-
-	return params
 }

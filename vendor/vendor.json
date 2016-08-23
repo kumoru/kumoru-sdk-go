@@ -33,6 +33,12 @@
 			"revisionTime": "2016-02-21T17:16:41Z"
 		},
 		{
+			"checksumSHA1": "3+LsRCtKtkKnszliWTm8FGw5+Wc=",
+			"path": "github.com/mattbaird/jsonpatch",
+			"revision": "cda1f16168eced02e2c315e83da80c7f1166a111",
+			"revisionTime": "2015-10-12T23:25:59Z"
+		},
+		{
 			"checksumSHA1": "xN14ZoFcgefABp24aowYtQVMDsc=",
 			"path": "github.com/pborman/uuid",
 			"revision": "c55201b036063326c5b1b89ccfe45a184973d073",

@@ -278,44 +278,20 @@ func Patch(cmd *cli.Cmd) {
 	})
 
 	image := cmd.String(cli.StringOpt{
-		Name:      "IMG_URL",
+		Name:      "image_url",
 		Desc:      "Image URL",
 		HideValue: true,
 	})
 
 	name := cmd.String(cli.StringOpt{
-		Name:      "APP_NAME",
+		Name:      "name",
 		Desc:      "Application Name",
-		HideValue: true,
-	})
-
-	certificate := cmd.String(cli.StringOpt{
-		Name:      "certificate_file",
-		Desc:      "File (PEM) containing the SSL certificate associated with the application",
 		HideValue: true,
 	})
 
 	envFile := cmd.String(cli.StringOpt{
 		Name:      "env_file",
 		Desc:      "Environment variables file",
-		HideValue: true,
-	})
-
-	certificateChain := cmd.String(cli.StringOpt{
-		Name:      "certificate_chain_file",
-		Desc:      "File (PEM) contianing the certificate chain associated with the public certificate (optional)",
-		HideValue: true,
-	})
-
-	privateKey := cmd.String(cli.StringOpt{
-		Name:      "private_key_file",
-		Desc:      "File (PEM) containing the SSL key associated with the public certificate (required if providing a certificate)",
-		HideValue: true,
-	})
-
-	sslPorts := cmd.Strings(cli.StringsOpt{
-		Name:      "ssl_port",
-		Desc:      "Port to be assocaited with the certificate",
 		HideValue: true,
 	})
 
@@ -328,12 +304,6 @@ func Patch(cmd *cli.Cmd) {
 	rules := cmd.Strings(cli.StringsOpt{
 		Name:      "r rule",
 		Desc:      "Application Deployment rules",
-		HideValue: true,
-	})
-
-	ports := cmd.Strings(cli.StringsOpt{
-		Name:      "p port",
-		Desc:      "Port",
 		HideValue: true,
 	})
 
@@ -350,59 +320,41 @@ func Patch(cmd *cli.Cmd) {
 	})
 
 	cmd.Action = func() {
-		app := application.Application{
+		originalApp := &application.Application{
 			UUID: *uuid,
 		}
 
-		var eVars []string
+		originalApp, _, errs := originalApp.Show()
 
-		if *envFile != "" {
-			eVars = readEnvFile(*envFile)
-		} else {
-			eVars = *enVars
+		if len(errs) != 0 {
+			log.Fatalf("Unable to retrieve application: %s", errs)
 		}
 
-		var m string
-		if *meta != "" {
-			mData := metaData(*meta, *labels)
+		patchedApp := *originalApp
 
-			mdata, err := json.Marshal(mData)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			log.Debug(mdata)
-			m = fmt.Sprintf("%s", mdata)
+		if *envFile != "" || len(*enVars) > 0 {
+			patchedApp.Environment = transformEnvironment(envFile, enVars)
+		} else if *image != "" {
+			patchedApp.ImageURL = *image
+		} else if *meta != "" || len(*labels) > 0 {
+			patchedApp.Metadata = metaData(*meta, *labels)
+		} else if *name != "" {
+			patchedApp.Name = *name
+		} else if len(*rules) > 0 {
+			patchedApp.Rules = transformRules(rules)
 		}
 
-		certificates := readCertificates(certificate, privateKey, certificateChain)
+		pApp, resp, errs := originalApp.Patch(&patchedApp)
 
-		c, err := json.Marshal(certificates)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if string(c) == "{}" {
-			c = []byte("")
-		}
-
-		resp, body, errs := app.Patch(string(c), *name, *image, m, eVars, *rules, *ports, *sslPorts)
-		if errs != nil {
-			log.Fatalf("Could not patch application: %s", errs)
+		if len(errs) > 0 {
+			log.Fatalf("Could not patch application: %s", errs[0])
 		}
 
 		if resp.StatusCode != 200 {
 			log.Fatalf("Could not patch application: %s", resp.Status)
 		}
 
-		err = json.Unmarshal([]byte(body), &app)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		printAppDetail(&app)
+		printAppDetail(pApp)
 	}
 }
 

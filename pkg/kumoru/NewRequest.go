@@ -30,6 +30,10 @@ func (k *Client) NewRequest() (*http.Request, error) {
 			req, err := http.NewRequest(k.Method, k.URL, strings.NewReader(k.RawString))
 			req.Header.Set("Content-Type", "application/json")
 			return req, err
+		} else if k.TargetType == "json-patch+json" {
+			req, err := http.NewRequest(k.Method, k.URL, strings.NewReader(k.RawString))
+			req.Header.Set("Content-Type", "application/json-patch+json")
+			return req, err
 		} else if k.TargetType == "form" {
 			req, err := http.NewRequest(k.Method, k.URL, bytes.NewBufferString(k.RawString))
 			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
