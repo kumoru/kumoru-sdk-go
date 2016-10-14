@@ -49,6 +49,29 @@ func TestTransformRules(t *testing.T) {
 
 }
 
+func TestEnvironment(t *testing.T) {
+	cases := []struct {
+		envFile     string
+		enVars      []string
+		expected    map[string]string
+		expectedErr error
+	}{
+		{
+			envFile:     "",
+			enVars:      []string{"FOO=bar", "DB=password=withequals"},
+			expected:    map[string]string{"FOO": "bar", "DB": "password=withequals"},
+			expectedErr: nil,
+		},
+	}
+	for _, c := range cases {
+		result := transformEnvironment(&c.envFile, &c.enVars)
+
+		if !reflect.DeepEqual(result, c.expected) {
+			t.Errorf("result == %v, expected %v", result, c.expected)
+		}
+	}
+}
+
 /*func TestReadCertificatesEmpty(t *testing.T) {
 
 	var cert, key, ca string

@@ -400,7 +400,7 @@ func transformEnvironment(envFile *string, enVars *[]string) map[string]string {
 	}
 
 	for _, v := range eVars {
-		e := strings.Split(v, "=")
+		e := strings.SplitN(v, "=", 2)
 		env[e[0]] = e[1]
 	}
 
