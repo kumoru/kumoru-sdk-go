@@ -25,19 +25,20 @@ import (
 
 //Resource respresents a resource model in authorization-manager API.
 type Resource struct {
-	CreatedAt string `json:"created_at"`
-	Type      string `json:"type"`
-	UpdatedAt string `json:"updated_at"`
-	UUID      string `json:"uuid"`
+	CreatedAt  string `json:"created_at"`
+	Type       string `json:"type"`
+	UpdatedAt  string `json:"updated_at"`
+	Identifier string `json:"identifier"`
+	Context    string `json:"context"`
 }
 
 // Find resources that are accesible to the requester
-func Find(rType, action, UUID string, wrappedRequest *http.Request) (*http.Response, string, []error) {
+func Find(rType, action, identifier string, wrappedRequest *http.Request) (*http.Response, string, []error) {
 	params := "select_by="
 	params += fmt.Sprintf("type=%s,", rType)
 	params += fmt.Sprintf("action=%s", action)
-	if UUID != "" {
-		params += fmt.Sprintf(",uuid=%s,", UUID)
+	if identifier != "" {
+		params += fmt.Sprintf(",uuid=%s,", identifier)
 	}
 
 	fmt.Println("Params: ", params)
