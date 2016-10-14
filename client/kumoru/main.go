@@ -39,7 +39,7 @@ func init() {
 	log.SetOutput(os.Stderr)
 }
 
-var version = "0.2.0"
+var version = "0.3.0"
 var gitVersion = "No Version Provided"
 
 func main() {

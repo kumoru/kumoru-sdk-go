@@ -33,17 +33,17 @@ type Endpoints struct {
 func LoadEndpoints(filename string, section string) Endpoints {
 	config, err := ini.Load(filename)
 
-	appManagerURL := "https://application.kumoru.io"
+	appManagerURL := "https://application.api.kumoru.io"
 	if os.Getenv("APPLICATION_MANAGER_URL") != "" {
 		appManagerURL = os.Getenv("APPLICATION_MANAGER_URL")
 	}
 
-	authManagerURL := "https://authorization.kumoru.io"
+	authManagerURL := "https://authorization.api.kumoru.io"
 	if os.Getenv("AUTHORIZATION_MANAGER_URL") != "" {
 		authManagerURL = os.Getenv("AUTHORIZATION_MANAGER_URL")
 	}
 
-	locationManagerURL := "https://location.kumoru.io"
+	locationManagerURL := "https://location.api.kumoru.io"
 	if os.Getenv("LOCATION_MANAGER_URL") != "" {
 		locationManagerURL = os.Getenv("LOCATION_MANAGER_URL")
 	}
