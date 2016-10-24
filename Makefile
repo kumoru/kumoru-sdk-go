@@ -62,3 +62,6 @@ cli-coverage:
 
 .PHONY: release-cli
 release-cli: clean test-cli darwin-binary linux-binary windows-binary
+	zip client/kumoru/builds/Darwin/kumoru-osx.zip client/kumoru/builds/Darwin/kumoru
+	zip client/kumoru/builds/Linux/kumoru-linux.zip client/kumoru/builds/Linux/kumoru
+	zip client/kumoru/builds/windows/kumoru-windows.zip client/kumoru/builds/Windows/kumoru

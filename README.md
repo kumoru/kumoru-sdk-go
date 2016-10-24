@@ -10,7 +10,7 @@ go get -u github.com/kumoru/kumoru-sdk-go
 
 ### Requirements
 
-* go 1.6
+* go 1.7
 
 ### The SDK
 
@@ -18,7 +18,7 @@ Each component of the SDK can be independently imported directly into your appli
 
 ```go
 …
-import "github.com/kumoru/kumoru-sdk-go/pkg/service/application/application.go
+import "github.com/kumoru/kumoru-sdk-go/pkg/service/application/application
 …
 ```
 
